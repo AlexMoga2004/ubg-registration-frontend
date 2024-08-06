@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState, useEffect } from "react";
 
 // Create a context for user authentication
 const UserContext = createContext();
@@ -6,7 +6,21 @@ const UserContext = createContext();
 // Create a provider component
 export const UserProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [user, setUser] = useState(null); // Optionally store user info
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const storedUser = localStorage.getItem("user");
+    if (token && storedUser) {
+      setIsAuthenticated(true);
+      setUser(JSON.parse(storedUser));
+    }
+  }, []);
+
+  useEffect(() => {
+    console.log("UserProvider - isAuthenticated:", isAuthenticated);
+    console.log("UserProvider - user:", user);
+  }, [isAuthenticated, user]);
 
   return (
     <UserContext.Provider

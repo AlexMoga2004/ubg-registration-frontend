@@ -6,13 +6,13 @@ import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import PersonOutlineOutlinedIcon from "@mui/icons-material/PersonOutlineOutlined";
 import logo from "../../data/images/logo.png";
 import axios from "axios";
-import { useUser } from "./../global/UserProvider"; // Import user context
+import { useUser } from "./../global/UserProvider";
 
 const LoginPage = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const navigate = useNavigate();
-  const { isAuthenticated, setIsAuthenticated } = useUser(); // Access authentication state
+  const { isAuthenticated, setIsAuthenticated, setUser } = useUser(); // Access authentication state
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -28,15 +28,16 @@ const LoginPage = () => {
     event.preventDefault();
     try {
       const response = await axios.post("http://localhost:8080/auth/login", {
-        email,
-        password,
+        email: email,
+        password: password,
       });
 
       const { token, user } = response.data;
       localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(user));
+
       setIsAuthenticated(true);
-      // Optionally, you can store user info if needed
-      // setUser(user);
+      setUser(user);
       navigate("/dashboard");
     } catch (error) {
       if (error.response) {

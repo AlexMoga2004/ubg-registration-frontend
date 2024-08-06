@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ProSidebar, Menu, MenuItem } from "react-pro-sidebar";
 import "react-pro-sidebar/dist/css/styles.css";
 import { Box, IconButton, Typography, useTheme } from "@mui/material";
@@ -10,10 +10,11 @@ import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
 import SchoolOutlinedIcon from "@mui/icons-material/SchoolOutlined";
 import LibraryBooksOutlinedIcon from "@mui/icons-material/LibraryBooksOutlined";
 import MessageOutlinedIcon from "@mui/icons-material/MessageOutlined";
-import MarkUnreadChatAltOutlinedIcon from "@mui/icons-material/MarkUnreadChatAltOutlined";
 import ContactSupportOutlinedIcon from "@mui/icons-material/ContactSupportOutlined";
 import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
 import EditCalendarOutlinedIcon from "@mui/icons-material/EditCalendarOutlined";
+
+import { useUser } from "./../global/UserProvider";
 
 const Item = ({ title, to, icon, selected, setSelected }) => {
   const theme = useTheme();
@@ -38,6 +39,18 @@ const Sidebar = () => {
   const colors = tokens(theme.palette.mode);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [selected, setSelected] = useState("Dashboard");
+  const { user } = useUser(); // Get user from context
+
+  const [profilePic, setProfilePic] = useState("");
+
+  useEffect(() => {
+    if (user && user.profilePicture) {
+      const base64String = btoa(
+        String.fromCharCode(...new Uint8Array(user.profilePicture))
+      );
+      setProfilePic(`data:image/png;base64,${base64String}`);
+    }
+  }, [user]);
 
   return (
     <Box
@@ -87,14 +100,14 @@ const Sidebar = () => {
             )}
           </MenuItem>
 
-          {!isCollapsed && (
+          {!isCollapsed && user && (
             <Box mb="25px">
               <Box display="flex" justifyContent="center" alignItems="center">
                 <img
                   alt="profile-user"
                   width="100px"
                   height="100px"
-                  src={`../../assets/user.png`}
+                  src={profilePic}
                   style={{ cursor: "pointer", borderRadius: "50%" }}
                 />
               </Box>
@@ -105,10 +118,10 @@ const Sidebar = () => {
                   fontWeight="bold"
                   sx={{ m: "10px 0 0 0" }}
                 >
-                  Alex Moga
+                  {user.firstname + " " + user.lastname}
                 </Typography>
                 <Typography variant="h5" color={colors.greenAccent[500]}>
-                  Vice Chancellor
+                  {user.role}
                 </Typography>
               </Box>
             </Box>
