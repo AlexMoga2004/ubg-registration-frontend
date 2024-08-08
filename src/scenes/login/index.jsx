@@ -135,7 +135,7 @@ const LoginPage = () => {
           type="submit"
           fullWidth
           variant="contained"
-          color="primary"
+          color="secondary"
           sx={{ mt: 3, mb: 2, borderRadius: "100px" }}
         >
           Sign In
