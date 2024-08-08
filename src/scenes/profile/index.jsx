@@ -1,6 +1,6 @@
 import { Box, Button, TextField, Typography, useTheme } from "@mui/material";
 import { useState } from "react";
-import { tokens } from "../../theme"; // Ensure to import your theme tokens
+import { tokens } from "../../theme";
 import { useUser } from "../global/UserProvider";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
@@ -9,9 +9,8 @@ const ProfilePage = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const navigate = useNavigate();
-  const { user, setUser, setIsAuthenticated } = useUser(); // Access user context
+  const { user, setUser, setIsAuthenticated } = useUser();
 
-  // Initial values from the user object
   const [initialFirstname] = useState(user?.firstname || "");
   const [initialLastname] = useState(user?.lastname || "");
   const [initialEmail] = useState(user?.email || "");
@@ -34,7 +33,6 @@ const ProfilePage = () => {
 
   const [error, setError] = useState("");
 
-  // Function to update user information
   const handleUpdate = async () => {
     if (isPasswordEditable && password !== confirmPassword) {
       setError("New passwords do not match.");
@@ -43,53 +41,35 @@ const ProfilePage = () => {
 
     try {
       const userUpdateRequest = {
-        currentEmail: user.email,
-        currentPassword: currentPassword,
+        originalEmail: user.email,
         firstname: isFirstnameEditable ? firstname : null,
         lastname: isLastnameEditable ? lastname : null,
         email: isEmailEditable ? email : null,
         password: isPasswordEditable ? password : null,
+        profilePictureBase64Image: newProfilePicture || null,
       };
 
+      const isAllFieldsNullOrEmpty =
+        !userUpdateRequest.firstname &&
+        !userUpdateRequest.lastname &&
+        !userUpdateRequest.email &&
+        !userUpdateRequest.password &&
+        !userUpdateRequest.profilePictureBase64Image;
+
+      if (isAllFieldsNullOrEmpty) {
+        return;
+      }
+
+      const token = localStorage.getItem("token");
+
       // Make a request to update user info
-      await axios.put("http://localhost:8080/auth/update", userUpdateRequest);
+      await axios.put("http://localhost:8080/auth/update", userUpdateRequest, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-      // Re-fetch user information using the login API
-      console.log(userUpdateRequest.email || userUpdateRequest.currentEmail);
-      console.log(
-        userUpdateRequest.password || userUpdateRequest.currentPassword
-      );
-      const loginResponse = await axios.post(
-        "http://localhost:8080/auth/login",
-        {
-          email: userUpdateRequest.email || userUpdateRequest.currentEmail,
-          password:
-            userUpdateRequest.password || userUpdateRequest.currentEmail,
-        }
-      );
-
-      const { token, newUser } = loginResponse.data;
-      console.log(newUser.firstname);
-
-      // Update user context with the newly fetched user data
       setIsAuthenticated(false);
-
-      // Clear fields
-      setFirstname(initialFirstname);
-      setLastname(initialLastname);
-      setEmail(initialEmail);
-      setPassword("");
-      setConfirmPassword("");
-      setCurrentPassword("");
-
-      // Reset edit states
-      setIsFirstnameEditable(false);
-      setIsLastnameEditable(false);
-      setIsEmailEditable(false);
-      setIsPasswordEditable(false);
-
-      // Navigate back or show success message
-      navigate("/dashboard");
     } catch (error) {
       setError("An error occurred. Please try again.");
     }
@@ -100,7 +80,7 @@ const ProfilePage = () => {
     if (file && file.type === "image/png") {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setNewProfilePicture(reader.result);
+        setNewProfilePicture(reader.result.split(",")[1]); // Save only the Base64 string part
       };
       reader.readAsDataURL(file);
     } else {
@@ -126,14 +106,18 @@ const ProfilePage = () => {
         p={4}
         borderRadius="16px"
         boxShadow={3}
-        width="400px" // Set a width for the box
+        width="400px"
       >
         <Typography variant="h5" mb={2}>
           Profile
         </Typography>
         <Box display="flex" alignItems="center" mb={3}>
           <img
-            src={newProfilePicture || profilePicture}
+            src={
+              newProfilePicture
+                ? `data:image/png;base64,${newProfilePicture}`
+                : profilePicture
+            }
             alt="Profile"
             width="99"
             height="99"
@@ -174,7 +158,7 @@ const ProfilePage = () => {
             variant="contained"
             onClick={() => {
               setIsFirstnameEditable(!isFirstnameEditable);
-              if (!isFirstnameEditable) setFirstname(initialFirstname); // Locking will revert to initial value
+              if (!isFirstnameEditable) setFirstname(initialFirstname);
             }}
             sx={{ ml: 1 }}
           >
@@ -197,7 +181,7 @@ const ProfilePage = () => {
             variant="contained"
             onClick={() => {
               setIsLastnameEditable(!isLastnameEditable);
-              if (!isLastnameEditable) setLastname(initialLastname); // Locking will revert to initial value
+              if (!isLastnameEditable) setLastname(initialLastname);
             }}
             sx={{ ml: 1 }}
           >
@@ -220,7 +204,7 @@ const ProfilePage = () => {
             variant="contained"
             onClick={() => {
               setIsEmailEditable(!isEmailEditable);
-              if (!isEmailEditable) setEmail(initialEmail); // Locking will revert to initial value
+              if (!isEmailEditable) setEmail(initialEmail);
             }}
             sx={{ ml: 1 }}
           >
@@ -260,17 +244,6 @@ const ProfilePage = () => {
         >
           {isPasswordEditable ? "Lock Password" : "Change Password"}
         </Button>
-
-        {/* Current Password Field (Only at Bottom) */}
-        <TextField
-          variant="outlined"
-          label="Current Password"
-          type="password"
-          value={currentPassword}
-          onChange={(e) => setCurrentPassword(e.target.value)}
-          fullWidth
-          margin="normal"
-        />
 
         {/* Update User Button */}
         <Button

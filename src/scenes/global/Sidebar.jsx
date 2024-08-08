@@ -41,16 +41,10 @@ const Sidebar = () => {
   const [selected, setSelected] = useState("Dashboard");
   const { user } = useUser(); // Get user from context
 
-  const [profilePic, setProfilePic] = useState("");
-
-  useEffect(() => {
-    if (user && user.profilePicture) {
-      const base64String = btoa(
-        String.fromCharCode(...new Uint8Array(user.profilePicture))
-      );
-      setProfilePic(`data:image/png;base64,${base64String}`);
-    }
-  }, [user]);
+  const profilePic =
+    user && user.profilePictureBase64Image
+      ? user.profilePictureBase64Image
+      : "";
 
   return (
     <Box
@@ -107,7 +101,7 @@ const Sidebar = () => {
                   alt="profile-user"
                   width="100px"
                   height="100px"
-                  src={profilePic}
+                  src={`data:image/png;base64,${profilePic}`} // Use the Base64 string directly
                   style={{ cursor: "pointer", borderRadius: "50%" }}
                 />
               </Box>
@@ -121,7 +115,7 @@ const Sidebar = () => {
                   {user.firstname + " " + user.lastname}
                 </Typography>
                 <Typography variant="h5" color={colors.greenAccent[500]}>
-                  {user.role}
+                  {user.roles && user.roles.join(", ")}
                 </Typography>
               </Box>
             </Box>
@@ -159,7 +153,6 @@ const Sidebar = () => {
             <Item
               title="Messages"
               to="/messages"
-              //   TODO: changed based on read/unread messages
               icon={<MessageOutlinedIcon />}
               selected={selected}
               setSelected={setSelected}
@@ -178,28 +171,31 @@ const Sidebar = () => {
               selected={selected}
               setSelected={setSelected}
             />
-            <Typography
-              variant="h6"
-              color={colors.grey[300]}
-              sx={{ m: "15px 0 5px 20px" }}
-              // TODO: make visible for admin users only
-            >
-              Admin
-            </Typography>
-            <Item
-              title="Manage all Modules"
-              to="/manage_modules"
-              icon={<AddOutlinedIcon />}
-              selected={selected}
-              setSelected={setSelected}
-            />
-            <Item
-              title="Signup Windows"
-              to="/signup_windows"
-              icon={<EditCalendarOutlinedIcon />}
-              selected={selected}
-              setSelected={setSelected}
-            />
+            {user && user.roles && user.roles.includes("Admin") && (
+              <>
+                <Typography
+                  variant="h6"
+                  color={colors.grey[300]}
+                  sx={{ m: "15px 0 5px 20px" }}
+                >
+                  Admin
+                </Typography>
+                <Item
+                  title="Manage all Modules"
+                  to="/manage_modules"
+                  icon={<AddOutlinedIcon />}
+                  selected={selected}
+                  setSelected={setSelected}
+                />
+                <Item
+                  title="Signup Windows"
+                  to="/signup_windows"
+                  icon={<EditCalendarOutlinedIcon />}
+                  selected={selected}
+                  setSelected={setSelected}
+                />
+              </>
+            )}
           </Box>
         </Menu>
       </ProSidebar>

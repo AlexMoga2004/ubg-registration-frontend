@@ -8,6 +8,7 @@ import Login from "./scenes/login";
 import Register from "./scenes/register";
 import ProfilePage from "./scenes/profile";
 import { UserProvider, useUser } from "./scenes/global/UserProvider";
+import MessagesPage from "./scenes/message";
 
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated } = useUser(); // Get the authentication state
@@ -33,7 +34,7 @@ const App = () => {
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
 
-                {/* Protect the routes with ProtectedRoute */}
+                {/* Protect the outher ProtectedRoute to require authentication*/}
                 <Route
                   path="/dashboard"
                   element={
@@ -50,9 +51,25 @@ const App = () => {
                     </ProtectedRoute>
                   }
                 />
+                <Route
+                  path="/messages"
+                  element={
+                    <ProtectedRoute>
+                      <MessagesPage />
+                    </ProtectedRoute>
+                  }
+                />
 
-                {/* Default to /login */}
-                <Route path="*" element={<Navigate to="/login" />} />
+                {/* Set default page */}
+                <Route
+                  path="*"
+                  element={
+                    <>
+                      {isLoggedIn && <Navigate to="/dashboard" />}
+                      {!isLoggedIn && <Navigate to="/login" />}
+                    </>
+                  }
+                />
               </Routes>
             </main>
           </div>

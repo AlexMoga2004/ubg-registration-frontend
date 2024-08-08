@@ -85,7 +85,7 @@ const Topbar = ({ loginMode: isLoggedIn }) => {
               >
                 Profile
               </MenuItem>
-              <MenuItem onClick={handleLogout}>Logout</MenuItem>
+              <MenuItem onClick={handleLogout}>Sign out</MenuItem>
             </Menu>
           </Box>
         )}
