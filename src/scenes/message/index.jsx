@@ -32,23 +32,21 @@ const MessagesPage = () => {
   const navigate = useNavigate();
 
   const [openModal, setOpenModal] = useState(false);
-  const [openDetailModal, setOpenDetailModal] = useState(false); // State for detail modal
+  const [openDetailModal, setOpenDetailModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [users, setUsers] = useState([]); // List of users to send messages to
+  const [users, setUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
   const [messageContent, setMessageContent] = useState("");
-  const [messageSubject, setMessageSubject] = useState(""); // New state for message subject
-  const [selectedMessage, setSelectedMessage] = useState(null); // State for selected message
+  const [messageSubject, setMessageSubject] = useState("");
+  const [selectedMessage, setSelectedMessage] = useState(null);
 
-  // State to hold sender details for messages
-  const [senders, setSenders] = useState({}); // Keyed by senderId
+  const [senders, setSenders] = useState({});
 
   useEffect(() => {
     if (isAuthenticated) {
       fetchMessages();
-      // Only fetch users if the current user is an admin
       if (user.roles.includes("Admin")) {
-        fetchUsers(); // Fetch users for autocomplete
+        fetchUsers();
       }
     } else {
       navigate("/login");
