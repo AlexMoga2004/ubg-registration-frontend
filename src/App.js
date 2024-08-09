@@ -1,4 +1,4 @@
-import { ColorModeContext, useMode } from "./theme";
+import React, { useEffect } from "react";
 import { CssBaseline, ThemeProvider } from "@mui/material";
 import { useLocation, Routes, Route, Navigate } from "react-router-dom";
 import Topbar from "./scenes/global/Topbar";
@@ -7,19 +7,55 @@ import Dashboard from "./scenes/dashboard";
 import Login from "./scenes/login";
 import Register from "./scenes/register";
 import ProfilePage from "./scenes/profile";
-import { UserProvider, useUser } from "./scenes/global/UserProvider";
 import MessagesPage from "./scenes/message";
+import { ColorModeContext, useMode } from "./theme";
+import axios from "axios";
+import { UserProvider, useUser } from "./scenes/global/UserProvider";
 
+// ProtectedRoute Component
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated } = useUser(); // Get the authentication state
 
   return isAuthenticated ? children : <Navigate to="/login" />;
 };
 
+// UserNavigator Component
+const UserNavigator = () => {
+  const { setIsAuthenticated } = useUser();
+
+  useEffect(() => {
+    const checkTokenValidity = async () => {
+      const token = localStorage.getItem("token");
+      if (token) {
+        try {
+          await axios.get("http://localhost:8080/auth/check-token", {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+        } catch (error) {
+          if (error.response && error.response.status === 401) {
+            // Token is expired or invalid
+            setIsAuthenticated(false);
+            localStorage.removeItem("token");
+            localStorage.removeItem("user");
+            window.location.href = "/login"; // Redirect to login
+          }
+        }
+      }
+    };
+
+    checkTokenValidity();
+  }, [setIsAuthenticated]);
+
+  return null; // This component doesn't need to render anything
+};
+
+// Main App Component
 const App = () => {
   const [theme, colorMode] = useMode();
   const location = useLocation();
-  const isLoggedIn = !["/", "/login", "/register"].includes(location.pathname);
+  const isLoggedIn = !["/login", "/register"].includes(location.pathname);
 
   return (
     <UserProvider>
@@ -27,6 +63,7 @@ const App = () => {
         <ThemeProvider theme={theme}>
           <CssBaseline />
           <div className="app">
+            <UserNavigator /> {/* Add the UserNavigator at the top */}
             {isLoggedIn && <Sidebar />}
             <main className="content">
               <Topbar loginMode={isLoggedIn} />
@@ -34,7 +71,7 @@ const App = () => {
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
 
-                {/* Protect the outher ProtectedRoute to require authentication*/}
+                {/* Protect the other routes to require authentication */}
                 <Route
                   path="/dashboard"
                   element={

@@ -88,17 +88,16 @@ const LoginPage = () => {
         borderRadius="16px"
         boxShadow={3}
       >
-        <LockOutlinedIcon fontSize="large" color="primary" />
+        <LockOutlinedIcon fontSize="large" color="inherit" />{" "}
+        {/* Change here */}
         <Typography variant="h5" mb={2}>
           Login
         </Typography>
-
         {error && (
           <Typography variant="body2" color="error" mb={2}>
             {error}
           </Typography>
         )}
-
         <TextField
           variant="outlined"
           margin="normal"
@@ -128,7 +127,9 @@ const LoginPage = () => {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           InputProps={{
-            startAdornment: <LockOutlinedIcon position="start" />,
+            startAdornment: (
+              <LockOutlinedIcon position="start" color="inherit" />
+            ), // Change here
           }}
         />
         <Button
