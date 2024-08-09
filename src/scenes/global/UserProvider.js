@@ -7,6 +7,7 @@ const UserContext = createContext();
 export const UserProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState(null);
+  const [unreadMessageCount, setUnreadMessageCount] = useState(0);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -17,14 +18,21 @@ export const UserProvider = ({ children }) => {
     }
   }, []);
 
-  useEffect(() => {
-    console.log("UserProvider - isAuthenticated:", isAuthenticated);
-    console.log("UserProvider - user:", user);
-  }, [isAuthenticated, user]);
+  // Function to update unread message count
+  const updateUnreadMessageCount = (count) => {
+    setUnreadMessageCount(count);
+  };
 
   return (
     <UserContext.Provider
-      value={{ isAuthenticated, setIsAuthenticated, user, setUser }}
+      value={{
+        isAuthenticated,
+        setIsAuthenticated,
+        user,
+        setUser,
+        unreadMessageCount,
+        updateUnreadMessageCount, // Add this line
+      }}
     >
       {children}
     </UserContext.Provider>

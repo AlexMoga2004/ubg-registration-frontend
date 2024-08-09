@@ -24,34 +24,18 @@ const Topbar = ({ loginMode: isLoggedIn }) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const colorMode = useContext(ColorModeContext);
-  const { setIsAuthenticated, setUser } = useUser();
+
+  // Access user and unreadMessageCount from UserContext
+  const {
+    setIsAuthenticated,
+    setUser,
+    user,
+    unreadMessageCount,
+    updateUnreadMessageCount,
+  } = useUser();
+
   const [anchorEl, setAnchorEl] = useState(null);
   const navigate = useNavigate();
-
-  const [unreadMessageCount, setUnreadMessageCount] = useState(0);
-  const { user } = useUser();
-
-  const fetchUnreadMessageCount = async () => {
-    try {
-      const response = await axios.get(
-        `http://localhost:8080/messages/unread-count`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
-      setUnreadMessageCount(response.data.count);
-    } catch (error) {
-      console.error("Error fetching unread messages count:", error);
-    }
-  };
-
-  useEffect(() => {
-    if (user) {
-      fetchUnreadMessageCount();
-    }
-  }, [user]);
 
   // Notification dropdown state
   const [notificationAnchorEl, setNotificationAnchorEl] = useState(null);
@@ -92,6 +76,30 @@ const Topbar = ({ loginMode: isLoggedIn }) => {
       navigate("/messages"); // Redirect to messages tab
     }
   };
+
+  // Fetch unread message count when the component mounts or user changes
+  const fetchUnreadMessageCount = async () => {
+    try {
+      const response = await axios.get(
+        `http://localhost:8080/messages/unread-count`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      updateUnreadMessageCount(response.data.count); // Update context state
+    } catch (error) {
+      console.error("Error fetching unread messages count:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (user) {
+      // Check if user exists before fetching
+      fetchUnreadMessageCount();
+    }
+  }, [user]); // Fetch unread message count when user changes
 
   return (
     <Box display="flex" justifyContent="space-between" p={2}>
@@ -172,9 +180,9 @@ const Topbar = ({ loginMode: isLoggedIn }) => {
               </Typography>
             </Popover>
 
-            <IconButton>
+            {/* <IconButton>
               <SettingsOutlinedIcon />
-            </IconButton>
+            </IconButton> */}
             <IconButton onClick={handleMenuOpen}>
               <PersonOutlinedIcon />
             </IconButton>
