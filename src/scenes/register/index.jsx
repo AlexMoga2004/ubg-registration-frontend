@@ -189,7 +189,7 @@ const RegisterPage = () => {
             error={!!errors.password}
             helperText={errors.password} // You might want to show the same error message
           />
-          <Button
+          <Button 
             type="submit"
             fullWidth
             variant="contained"
