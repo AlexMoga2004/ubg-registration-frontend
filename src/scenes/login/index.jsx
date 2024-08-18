@@ -254,7 +254,7 @@ const AuthPage = () => {
                 position: "absolute",
                 top: 0,
                 left: 0,
-                bgcolor: colors.common.white,
+                bgcolor: "#FCFCFC",
                 zIndex: 1000,
               }}
             >
