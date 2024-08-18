@@ -48,7 +48,7 @@ const Sidebar = () => {
   useEffect(() => {
     const timeout = setTimeout(() => {
       setSidebarColor(colors.primary[400]);
-    }, 500);
+    }, 0);
 
     return () => clearTimeout(timeout);
   }, [colors.primary]);
@@ -82,7 +82,7 @@ const Sidebar = () => {
       <ProSidebar collapsed={isCollapsed}>
         <Menu iconShape="square">
           {/* LOGO AND MENU ICON */}
-          <Animate type="fade" delay={1}>
+          <Animate type="fade" delay={0.5}>
             <MenuItem
               onClick={() => setIsCollapsed(!isCollapsed)}
               icon={isCollapsed ? <MenuOutlinedIcon /> : undefined}
@@ -136,7 +136,7 @@ const Sidebar = () => {
             )}
           </Animate>
 
-          <Animate sx={{ flexGrow: 1 }} delay={1}>
+          <Animate sx={{ flexGrow: 1 }} delay={0.5}>
             <Box paddingLeft={isCollapsed ? undefined : "10%"}>
               <Item
                 title="Dashboard"

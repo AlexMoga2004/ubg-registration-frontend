@@ -20,6 +20,7 @@ import { tokens } from "../../theme";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "./../global/UserProvider"; // Use the UserProvider context
+import Animate from "../../components/common/Animate";
 
 const MessagesPage = () => {
   const theme = useTheme();
@@ -220,19 +221,21 @@ const MessagesPage = () => {
 
   return (
     <Box p={3}>
-      <Typography variant="h4" gutterBottom>
-        Messages
-      </Typography>
-      {user.roles.includes("Admin") && (
-        <Button
-          variant="contained"
-          color="secondary"
-          onClick={() => setOpenModal(true)}
-          sx={{ mb: 2 }}
-        >
-          Send Message
-        </Button>
-      )}
+      <Animate sx={{ flexGrow: 1 }} delay={0}>
+        <Typography variant="h4" gutterBottom>
+          Messages
+        </Typography>
+        {user.roles.includes("Admin") && (
+          <Button
+            variant="contained"
+            color="secondary"
+            onClick={() => setOpenModal(true)}
+            sx={{ mb: 2 }}
+          >
+            Send Message
+          </Button>
+        )}
+      </Animate>
 
       {/* Message Modal */}
       <Modal
@@ -454,56 +457,60 @@ const MessagesPage = () => {
       </Modal>
 
       {/* Messages Table */}
-      <TableContainer
-        component={Paper}
-        sx={{ backgroundColor: colors.primary[400] }}
-      >
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>From</TableCell>
-              <TableCell>Subject</TableCell>
-              <TableCell>Date</TableCell>
-              <TableCell>Status</TableCell>
-              <TableCell>Roles</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {messages.map((message) => (
-              <TableRow
-                key={message.id}
-                onClick={() => viewMessageDetails(message)}
-                sx={{
-                  cursor: "pointer",
-                  "&:hover": { backgroundColor: colors.primary[300] }, // Change the background on hover
-                }}
-              >
-                <TableCell>
-                  {senders[message.senderID]?.firstname}{" "}
-                  {senders[message.senderID]?.lastname}
-                </TableCell>
-                <TableCell>{message.messageSubject}</TableCell>
-                <TableCell>{new Date(message.date).toLocaleString()}</TableCell>
-                <TableCell>{message.read ? "Read" : "Unread"}</TableCell>{" "}
-                {/* Add read status */}
-                <TableCell>
-                  {senders[message.senderID]?.roles.join(", ")}{" "}
-                  {/* Display user roles */}
-                </TableCell>
+      <Animate sx={{ flexGrow: 1 }} delay={0.2}>
+        <TableContainer
+          component={Paper}
+          sx={{ backgroundColor: colors.primary[400] }}
+        >
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>From</TableCell>
+                <TableCell>Subject</TableCell>
+                <TableCell>Date</TableCell>
+                <TableCell>Status</TableCell>
+                <TableCell>Roles</TableCell>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-      <TablePagination
-        rowsPerPageOptions={[10, 25, 50]}
-        component="div"
-        count={messages.length} // Update count to match total messages
-        rowsPerPage={rowsPerPage}
-        page={page}
-        onPageChange={handlePageChange}
-        onRowsPerPageChange={handleRowsPerPageChange}
-      />
+            </TableHead>
+            <TableBody>
+              {messages.map((message) => (
+                <TableRow
+                  key={message.id}
+                  onClick={() => viewMessageDetails(message)}
+                  sx={{
+                    cursor: "pointer",
+                    "&:hover": { backgroundColor: colors.primary[300] }, // Change the background on hover
+                  }}
+                >
+                  <TableCell>
+                    {senders[message.senderID]?.firstname}{" "}
+                    {senders[message.senderID]?.lastname}
+                  </TableCell>
+                  <TableCell>{message.messageSubject}</TableCell>
+                  <TableCell>
+                    {new Date(message.date).toLocaleString()}
+                  </TableCell>
+                  <TableCell>{message.read ? "Read" : "Unread"}</TableCell>{" "}
+                  {/* Add read status */}
+                  <TableCell>
+                    {senders[message.senderID]?.roles.join(", ")}{" "}
+                    {/* Display user roles */}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+        <TablePagination
+          rowsPerPageOptions={[10, 25, 50]}
+          component="div"
+          count={messages.length} // Update count to match total messages
+          rowsPerPage={rowsPerPage}
+          page={page}
+          onPageChange={handlePageChange}
+          onRowsPerPageChange={handleRowsPerPageChange}
+        />
+      </Animate>
     </Box>
   );
 };

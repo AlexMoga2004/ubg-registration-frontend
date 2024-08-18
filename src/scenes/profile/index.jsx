@@ -4,6 +4,7 @@ import { tokens } from "../../theme";
 import { useUser } from "../global/UserProvider";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import Animate from "../../components/common/Animate";
 
 const ProfilePage = () => {
   const theme = useTheme();
@@ -89,173 +90,175 @@ const ProfilePage = () => {
   };
 
   return (
-    <Box
-      display="flex"
-      flexDirection="column"
-      alignItems="center"
-      justifyContent="center"
-      minHeight="75vh"
-      p={2}
-    >
+    <Animate sx={{ flexGrow: 1 }} delay={0}>
       <Box
         display="flex"
         flexDirection="column"
         alignItems="center"
         justifyContent="center"
-        backgroundColor={colors.primary[400]}
-        p={4}
-        borderRadius="16px"
-        boxShadow={3}
-        width="400px"
+        minHeight="75vh"
+        p={2}
       >
-        <Typography variant="h5" mb={2}>
-          Profile
-        </Typography>
-        <Box display="flex" alignItems="center" mb={3}>
-          <img
-            src={
-              newProfilePicture
-                ? `data:image/png;base64,${newProfilePicture}`
-                : profilePicture
-            }
-            alt="Profile"
-            width="99"
-            height="99"
-            style={{ borderRadius: "49%", marginRight: "20px" }}
-          />
-          <input
-            accept="image/png"
-            style={{ display: "none" }}
-            id="profile-pic-upload"
-            type="file"
-            onChange={handleProfilePictureUpload}
-          />
-          <label htmlFor="profile-pic-upload">
-            <Button variant="contained" component="span">
-              Upload New Profile Picture
-            </Button>
-          </label>
-        </Box>
-
-        {error && (
-          <Typography variant="body2" color="error" mb={2}>
-            {error}
+        <Box
+          display="flex"
+          flexDirection="column"
+          alignItems="center"
+          justifyContent="center"
+          backgroundColor={colors.primary[400]}
+          p={4}
+          borderRadius="16px"
+          boxShadow={3}
+          width="400px"
+        >
+          <Typography variant="h5" mb={2}>
+            Profile
           </Typography>
-        )}
+          <Box display="flex" alignItems="center" mb={3}>
+            <img
+              src={
+                newProfilePicture
+                  ? `data:image/png;base64,${newProfilePicture}`
+                  : profilePicture
+              }
+              alt="Profile"
+              width="99"
+              height="99"
+              style={{ borderRadius: "49%", marginRight: "20px" }}
+            />
+            <input
+              accept="image/png"
+              style={{ display: "none" }}
+              id="profile-pic-upload"
+              type="file"
+              onChange={handleProfilePictureUpload}
+            />
+            <label htmlFor="profile-pic-upload">
+              <Button variant="contained" component="span">
+                Upload New Profile Picture
+              </Button>
+            </label>
+          </Box>
 
-        {/* First Name Field */}
-        <Box display="flex" alignItems="center">
-          <TextField
-            variant="outlined"
-            label="First Name"
-            value={isFirstnameEditable ? firstname : initialFirstname}
-            onChange={(e) => setFirstname(e.target.value)}
-            fullWidth
-            margin="normal"
-            disabled={!isFirstnameEditable}
-          />
-          <Button
-            variant="contained"
-            onClick={() => {
-              setIsFirstnameEditable(!isFirstnameEditable);
-              if (!isFirstnameEditable) setFirstname(initialFirstname);
-            }}
-            sx={{ ml: 1 }}
-          >
-            {isFirstnameEditable ? "Lock" : "Change"}
-          </Button>
-        </Box>
+          {error && (
+            <Typography variant="body2" color="error" mb={2}>
+              {error}
+            </Typography>
+          )}
 
-        {/* Last Name Field */}
-        <Box display="flex" alignItems="center">
-          <TextField
-            variant="outlined"
-            label="Last Name"
-            value={isLastnameEditable ? lastname : initialLastname}
-            onChange={(e) => setLastname(e.target.value)}
-            fullWidth
-            margin="normal"
-            disabled={!isLastnameEditable}
-          />
-          <Button
-            variant="contained"
-            onClick={() => {
-              setIsLastnameEditable(!isLastnameEditable);
-              if (!isLastnameEditable) setLastname(initialLastname);
-            }}
-            sx={{ ml: 1 }}
-          >
-            {isLastnameEditable ? "Lock" : "Change"}
-          </Button>
-        </Box>
-
-        {/* Email Field */}
-        <Box display="flex" alignItems="center">
-          <TextField
-            variant="outlined"
-            label="Email"
-            value={isEmailEditable ? email : initialEmail}
-            onChange={(e) => setEmail(e.target.value)}
-            fullWidth
-            margin="normal"
-            disabled={!isEmailEditable}
-          />
-          <Button
-            variant="contained"
-            onClick={() => {
-              setIsEmailEditable(!isEmailEditable);
-              if (!isEmailEditable) setEmail(initialEmail);
-            }}
-            sx={{ ml: 1 }}
-          >
-            {isEmailEditable ? "Lock" : "Change"}
-          </Button>
-        </Box>
-
-        {/* New Password Field */}
-        {isPasswordEditable && (
-          <>
+          {/* First Name Field */}
+          <Box display="flex" alignItems="center">
             <TextField
               variant="outlined"
-              label="New Password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              label="First Name"
+              value={isFirstnameEditable ? firstname : initialFirstname}
+              onChange={(e) => setFirstname(e.target.value)}
               fullWidth
               margin="normal"
+              disabled={!isFirstnameEditable}
             />
+            <Button
+              variant="contained"
+              onClick={() => {
+                setIsFirstnameEditable(!isFirstnameEditable);
+                if (!isFirstnameEditable) setFirstname(initialFirstname);
+              }}
+              sx={{ ml: 1 }}
+            >
+              {isFirstnameEditable ? "Lock" : "Change"}
+            </Button>
+          </Box>
+
+          {/* Last Name Field */}
+          <Box display="flex" alignItems="center">
             <TextField
               variant="outlined"
-              label="Confirm New Password"
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
+              label="Last Name"
+              value={isLastnameEditable ? lastname : initialLastname}
+              onChange={(e) => setLastname(e.target.value)}
               fullWidth
               margin="normal"
+              disabled={!isLastnameEditable}
             />
-          </>
-        )}
+            <Button
+              variant="contained"
+              onClick={() => {
+                setIsLastnameEditable(!isLastnameEditable);
+                if (!isLastnameEditable) setLastname(initialLastname);
+              }}
+              sx={{ ml: 1 }}
+            >
+              {isLastnameEditable ? "Lock" : "Change"}
+            </Button>
+          </Box>
 
-        {/* Change Password Button */}
-        <Button
-          onClick={() => setIsPasswordEditable(!isPasswordEditable)}
-          variant="contained"
-          sx={{ mt: 2 }}
-        >
-          {isPasswordEditable ? "Lock Password" : "Change Password"}
-        </Button>
+          {/* Email Field */}
+          <Box display="flex" alignItems="center">
+            <TextField
+              variant="outlined"
+              label="Email"
+              value={isEmailEditable ? email : initialEmail}
+              onChange={(e) => setEmail(e.target.value)}
+              fullWidth
+              margin="normal"
+              disabled={!isEmailEditable}
+            />
+            <Button
+              variant="contained"
+              onClick={() => {
+                setIsEmailEditable(!isEmailEditable);
+                if (!isEmailEditable) setEmail(initialEmail);
+              }}
+              sx={{ ml: 1 }}
+            >
+              {isEmailEditable ? "Lock" : "Change"}
+            </Button>
+          </Box>
 
-        {/* Update User Button */}
-        <Button
-          onClick={handleUpdate}
-          variant="contained"
-          color="primary"
-          sx={{ mt: 2 }}
-        >
-          Update User
-        </Button>
+          {/* New Password Field */}
+          {isPasswordEditable && (
+            <>
+              <TextField
+                variant="outlined"
+                label="New Password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                fullWidth
+                margin="normal"
+              />
+              <TextField
+                variant="outlined"
+                label="Confirm New Password"
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                fullWidth
+                margin="normal"
+              />
+            </>
+          )}
+
+          {/* Change Password Button */}
+          <Button
+            onClick={() => setIsPasswordEditable(!isPasswordEditable)}
+            variant="contained"
+            sx={{ mt: 2 }}
+          >
+            {isPasswordEditable ? "Lock Password" : "Change Password"}
+          </Button>
+
+          {/* Update User Button */}
+          <Button
+            onClick={handleUpdate}
+            variant="contained"
+            color="primary"
+            sx={{ mt: 2 }}
+          >
+            Update User
+          </Button>
+        </Box>
       </Box>
-    </Box>
+    </Animate>
   );
 };
 
