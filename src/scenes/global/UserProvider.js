@@ -1,9 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 
-// Create a context for user authentication
 const UserContext = createContext();
 
-// Create a provider component
 export const UserProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState(null);
@@ -18,7 +16,6 @@ export const UserProvider = ({ children }) => {
     }
   }, []);
 
-  // Function to update unread message count
   const updateUnreadMessageCount = (count) => {
     setUnreadMessageCount(count);
   };
@@ -31,7 +28,7 @@ export const UserProvider = ({ children }) => {
         user,
         setUser,
         unreadMessageCount,
-        updateUnreadMessageCount, // Add this line
+        updateUnreadMessageCount,
       }}
     >
       {children}
@@ -39,5 +36,4 @@ export const UserProvider = ({ children }) => {
   );
 };
 
-// Create a custom hook to use the UserContext
 export const useUser = () => useContext(UserContext);

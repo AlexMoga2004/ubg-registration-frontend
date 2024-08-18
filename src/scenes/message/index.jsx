@@ -41,12 +41,25 @@ const MessagesPage = () => {
   const [selectedMessage, setSelectedMessage] = useState(null);
 
   const [senders, setSenders] = useState({});
+  const [roles, setRoles] = useState([]);
 
   useEffect(() => {
     if (isAuthenticated) {
       fetchMessages();
       if (user.roles.includes("Admin")) {
         fetchUsers();
+      }
+    } else {
+      navigate("/login");
+    }
+  }, [isAuthenticated, page, rowsPerPage, navigate]);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchMessages();
+      if (user.roles.includes("Admin")) {
+        fetchUsers();
+        fetchRoles(); // Fetch roles when the user is an Admin
       }
     } else {
       navigate("/login");
@@ -107,6 +120,20 @@ const MessagesPage = () => {
     }
   };
 
+  const fetchRoles = async () => {
+    try {
+      const response = await axios.get(
+        `http://localhost:8080/auth/unique-roles`,
+        {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        }
+      );
+      setRoles(response.data);
+    } catch (error) {
+      console.error("Error fetching roles:", error);
+    }
+  };
+
   const handlePageChange = (event, newPage) => {
     setPage(newPage);
   };
@@ -127,20 +154,42 @@ const MessagesPage = () => {
         read: false,
       };
 
-      try {
-        await axios.post(`http://localhost:8080/messages`, message, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        });
-        setMessageContent("");
-        setMessageSubject("");
-        setSelectedUser(null);
-        setOpenModal(false);
-        fetchMessages();
-      } catch (error) {
-        console.error("Error sending message:", error);
+      // If a role is selected, send the message to all users with that role
+      if (selectedUser.isRole) {
+        const usersWithRole = users.filter((u) =>
+          u.roles.includes(selectedUser.role)
+        );
+        for (const userWithRole of usersWithRole) {
+          await axios.post(
+            `http://localhost:8080/messages`,
+            {
+              ...message,
+              recipientID: userWithRole.id, // Send to each user with the role
+            },
+            {
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+              },
+            }
+          );
+        }
+      } else {
+        try {
+          await axios.post(`http://localhost:8080/messages`, message, {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          });
+        } catch (error) {
+          console.error("Error sending message:", error);
+        }
       }
+
+      setMessageContent("");
+      setMessageSubject("");
+      setSelectedUser(null);
+      setOpenModal(false);
+      fetchMessages();
     }
   };
 
@@ -198,56 +247,81 @@ const MessagesPage = () => {
             top: "50%",
             left: "50%",
             transform: "translate(-50%, -50%)",
-            width: 400,
+            width: 600,
             bgcolor: colors.primary[400],
             boxShadow: 24,
             p: 4,
             borderRadius: 2,
+            display: "flex",
+            flexDirection: "column",
+            gap: 2,
           }}
         >
           <Typography id="send-message-modal" variant="h6" component="h2">
             Send Message
           </Typography>
           <Autocomplete
-            options={users}
+            options={[
+              ...users,
+              ...roles.map((role) => ({ role, isRole: true })),
+            ]}
             getOptionLabel={(option) =>
-              `${option.firstname} ${option.lastname}`
+              option.isRole
+                ? option.role
+                : `${option.firstname} ${option.lastname} (${option.roles.join(
+                    ", "
+                  )})`
             }
             onInputChange={(event, newInputValue) => {
               setSearchTerm(newInputValue);
               fetchUsers();
             }}
             onChange={(event, newValue) => {
-              setSelectedUser(newValue);
+              if (newValue) {
+                // Check if selected value is a role
+                if (newValue.isRole) {
+                  setSelectedUser({ ...newValue, id: null }); // Set as a role
+                } else {
+                  setSelectedUser(newValue);
+                }
+              }
             }}
             renderOption={(props, option) => (
               <Box {...props} display="flex" alignItems="center">
-                <img
-                  src={`data:image/png;base64,${option.profilePictureBase64Image}`}
-                  alt={`${option.firstname} ${option.lastname}`}
-                  style={{
-                    width: 40,
-                    height: 40,
-                    borderRadius: "50%",
-                    marginRight: 10,
-                  }}
-                />
+                {!option.isRole && (
+                  <img
+                    src={`data:image/png;base64,${option.profilePictureBase64Image}`}
+                    alt={`${option.firstname} ${option.lastname}`}
+                    style={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: "50%",
+                      marginRight: 10,
+                    }}
+                  />
+                )}
                 <Box>
                   <Typography variant="body1">
-                    {option.firstname} {option.lastname}
+                    {option.isRole
+                      ? option.role
+                      : `${option.firstname} ${option.lastname}`}
                   </Typography>
                   <Typography variant="body2" color="textSecondary">
-                    {option.roles.join(", ")}{" "}
+                    {!option.isRole && option.roles.join(", ")}
                   </Typography>
                 </Box>
               </Box>
             )}
             renderInput={(params) => (
-              <TextField {...params} label="Search User" variant="outlined" />
+              <TextField
+                {...params}
+                label="Search User or Role"
+                variant="outlined"
+              />
             )}
             filterOptions={(options, { inputValue }) =>
               options.filter((option) =>
-                `${option.firstname} ${option.lastname}`
+                `${option.firstname || option.role}`
                   .toLowerCase()
                   .includes(inputValue.toLowerCase())
               )
@@ -260,30 +334,34 @@ const MessagesPage = () => {
             value={messageSubject}
             onChange={(e) => setMessageSubject(e.target.value)}
             inputProps={{ maxLength: 45 }} // Max length for subject
-            helperText={`${messageSubject.length}/45`} // Character count
-            sx={{ mt: 2 }}
           />
           <TextField
             fullWidth
             label="Message Content"
+            variant="outlined"
             multiline
             rows={4}
-            variant="outlined"
             value={messageContent}
             onChange={(e) => setMessageContent(e.target.value)}
-            inputProps={{ maxLength: 2000 }} // Max length for content
-            helperText={`${messageContent.length}/2000`} // Character count
-            sx={{ mt: 2 }}
           />
-          <Button
-            variant="contained"
-            color="secondary"
-            onClick={handleSendMessage}
-            sx={{ mt: 2 }}
-            disabled={!selectedUser || !messageContent || !messageSubject}
-          >
-            Send
-          </Button>
+          <Box mt={2}>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleSendMessage}
+              disabled={!messageContent || !messageSubject}
+            >
+              Send
+            </Button>
+            <Button
+              variant="contained"
+              color="error"
+              onClick={() => setOpenModal(false)}
+              sx={{ ml: 2 }}
+            >
+              Cancel
+            </Button>
+          </Box>
         </Box>
       </Modal>
 
@@ -375,81 +453,57 @@ const MessagesPage = () => {
         </Box>
       </Modal>
 
+      {/* Messages Table */}
       <TableContainer
         component={Paper}
         sx={{ backgroundColor: colors.primary[400] }}
       >
         <Table>
-          <TableHead sx={{ backgroundColor: colors.primary[400] }}>
+          <TableHead>
             <TableRow>
-              <TableCell>Sender</TableCell>
+              <TableCell>From</TableCell>
               <TableCell>Subject</TableCell>
-              <TableCell>Status</TableCell> {/* New Status Column */}
               <TableCell>Date</TableCell>
-              <TableCell align="center">Actions</TableCell>
+              <TableCell>Status</TableCell>
+              <TableCell>Roles</TableCell>
             </TableRow>
           </TableHead>
-          <TableBody
-            sx={{
-              backgroundColor:
-                theme.palette.mode === "dark" ? "#2D3D5B" : "#FCFCFC",
-            }}
-          >
+          <TableBody>
             {messages.map((message) => (
-              <TableRow key={message.id}>
-                {senders[message.senderID] ? (
-                  <>
-                    <TableCell>
-                      {senders[message.senderID].firstname}{" "}
-                      {senders[message.senderID].lastname}
-                    </TableCell>
-                    <TableCell>{message.messageSubject}</TableCell>
-                    <TableCell>
-                      {message.read ? "Read" : "Unread"}{" "}
-                      {/* Show read status */}
-                    </TableCell>
-                  </>
-                ) : (
-                  <>
-                    <TableCell>Loading...</TableCell>
-                    <TableCell>Loading...</TableCell>
-                    <TableCell>Loading...</TableCell>
-                  </>
-                )}
+              <TableRow
+                key={message.id}
+                onClick={() => viewMessageDetails(message)}
+                sx={{
+                  cursor: "pointer",
+                  "&:hover": { backgroundColor: colors.primary[300] }, // Change the background on hover
+                }}
+              >
+                <TableCell>
+                  {senders[message.senderID]?.firstname}{" "}
+                  {senders[message.senderID]?.lastname}
+                </TableCell>
+                <TableCell>{message.messageSubject}</TableCell>
                 <TableCell>{new Date(message.date).toLocaleString()}</TableCell>
-                <TableCell align="center">
-                  <Button
-                    variant="outlined"
-                    onClick={() => viewMessageDetails(message)}
-                    sx={{
-                      color:
-                        theme.palette.mode === "dark"
-                          ? colors.grey[200]
-                          : colors.grey[800],
-                      borderColor:
-                        theme.palette.mode === "dark"
-                          ? colors.grey[200]
-                          : colors.grey[800],
-                    }}
-                  >
-                    View
-                  </Button>
+                <TableCell>{message.read ? "Read" : "Unread"}</TableCell>{" "}
+                {/* Add read status */}
+                <TableCell>
+                  {senders[message.senderID]?.roles.join(", ")}{" "}
+                  {/* Display user roles */}
                 </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
-        <TablePagination
-          sx={{ backgroundColor: colors.primary[400] }}
-          rowsPerPageOptions={[10, 25, 50]}
-          component="div"
-          count={messages.length}
-          rowsPerPage={rowsPerPage}
-          page={page}
-          onPageChange={handlePageChange}
-          onRowsPerPageChange={handleRowsPerPageChange}
-        />
       </TableContainer>
+      <TablePagination
+        rowsPerPageOptions={[10, 25, 50]}
+        component="div"
+        count={messages.length} // Update count to match total messages
+        rowsPerPage={rowsPerPage}
+        page={page}
+        onPageChange={handlePageChange}
+        onRowsPerPageChange={handleRowsPerPageChange}
+      />
     </Box>
   );
 };

@@ -1,54 +1,65 @@
 import {
   Box,
   Button,
+  TextField,
   Typography,
+  Grid,
   useTheme,
-  IconButton,
-  Badge,
 } from "@mui/material";
-import { useState, useEffect } from "react";
-import { tokens } from "../../theme";
+import { useContext, useState } from "react";
+import { ColorModeContext, tokens } from "../../theme";
+import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
+import logo from "../../data/images/logo.png";
 import axios from "axios";
-import { useUser } from "./../global/UserProvider";
-import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
-import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
+import { Link, useNavigate } from "react-router-dom";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import { DesktopDatePicker } from "@mui/x-date-pickers/DesktopDatePicker";
 
-const MessagePage = () => {
+const RegisterPage = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
-  const { user } = useUser(); // Assuming you have user context
-  const [messages, setMessages] = useState([]);
-  const [currentPage, setCurrentPage] = useState(0);
-  const [totalPages, setTotalPages] = useState(0);
-  const [showMessage, setShowMessage] = useState(null);
+  const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchMessages = async () => {
-      try {
-        const response = await axios.get(
-          `http://localhost:8080/messages/received?page=${currentPage}&size=10`,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          }
-        );
-        setMessages(response.data.content);
-        setTotalPages(response.data.totalPages);
-      } catch (error) {
-        console.error("Error fetching messages:", error);
+  const [firstname, setFirstname] = useState("");
+  const [lastname, setLastname] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
+  // State for error messages
+  const [errors, setErrors] = useState({});
+
+  const handleSignup = async (event) => {
+    event.preventDefault();
+    if (password !== confirmPassword) {
+      setErrors({ ...errors, password: "Passwords do not match" });
+      return;
+    }
+
+    try {
+      const response = await axios.post("http://localhost:8080/auth/register", {
+        firstname: firstname,
+        lastname: lastname,
+        email: email,
+        password: password,
+      });
+
+      navigate("/login", {
+        state: { message: "User registered successfully" },
+      });
+    } catch (error) {
+      if (error.response) {
+        // Clear previous errors
+        setErrors({});
+        // Set errors based on the response
+        setErrors(error.response.data);
+      } else {
+        setErrors({
+          general: "An unexpected error occurred. Please try again.",
+        });
       }
-    };
-
-    fetchMessages();
-  }, [currentPage]);
-
-  const handleShowMessage = (message) => {
-    setShowMessage(message);
-  };
-
-  const handleCloseMessage = () => {
-    setShowMessage(null);
+    }
   };
 
   return (
@@ -59,121 +70,141 @@ const MessagePage = () => {
       justifyContent="center"
       minHeight="75vh"
       p={2}
-      backgroundColor={colors.primary[400]} // Updated background color
     >
-      {user?.roles.includes("Admin") && (
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={() => {
-            /* logic to send a message */
-          }}
-          sx={{ mb: 3, borderRadius: "100px" }}
-        >
-          Send Message
-        </Button>
-      )}
-
-      {messages.map((message) => (
-        <Box
-          key={message.id}
-          p={2}
-          mb={2}
-          borderRadius="8px"
-          boxShadow={2}
-          width="100%"
-          maxWidth="600px"
-          backgroundColor={
-            message.read ? colors.primary[300] : colors.primary[500]
-          } // Lighten up the color for unread messages
-          onClick={() => handleShowMessage(message)}
-          sx={{
-            cursor: "pointer",
-            "&:hover": {
-              backgroundColor: colors.primary[600],
-            },
-          }}
-        >
-          <Box
-            display="flex"
-            justifyContent="space-between"
-            alignItems="center"
-          >
-            <Typography variant="subtitle1" fontWeight="bold">
-              {`${message.senderFirstName} ${message.senderLastName}`}
-            </Typography>
-            <Typography variant="body2" color="textSecondary">
-              {new Date(message.date).toLocaleDateString()}
-            </Typography>
-            <Badge color="secondary" variant="dot" invisible={message.read} />
-          </Box>
-          <Typography variant="body2" color="textSecondary">
-            {message.senderRoles.join(", ")}
-          </Typography>
-        </Box>
-      ))}
-
       <Box
-        mt={2}
+        position="absolute"
+        top="20px"
         display="flex"
-        justifyContent="space-between"
-        width="100%"
-        maxWidth="600px"
+        flexDirection="column"
+        alignItems="center"
+        justifyContent="center"
+        mb={4}
       >
-        <IconButton
-          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 0))}
-          disabled={currentPage === 0}
-        >
-          <ArrowBackIosIcon />
-        </IconButton>
-        <Typography variant="body2">
-          Page {currentPage + 1} of {totalPages}
-        </Typography>
-        <IconButton
-          onClick={() =>
-            setCurrentPage((prev) => (prev + 1 < totalPages ? prev + 1 : prev))
-          }
-          disabled={currentPage + 1 >= totalPages}
-        >
-          <ArrowForwardIosIcon />
-        </IconButton>
+        <img
+          src={logo}
+          alt="Logo"
+          style={{ width: "150px", marginBottom: "20px" }}
+        />
       </Box>
-
-      {showMessage && (
+      <LocalizationProvider dateAdapter={AdapterDateFns}>
         <Box
-          position="fixed"
-          top="50%"
-          left="50%"
-          transform="translate(-50%, -50%)"
+          component="form"
+          onSubmit={handleSignup}
+          display="flex"
+          flexDirection="column"
+          alignItems="center"
+          justifyContent="center"
+          backgroundColor={colors.primary[400]}
           p={4}
           borderRadius="16px"
           boxShadow={3}
-          width="90%"
-          maxWidth="500px"
-          backgroundColor={colors.primary[400]}
+          width="100%"
+          maxWidth="400px"
         >
-          <Typography variant="h6" mb={2}>
-            From:{" "}
-            {`${showMessage.senderFirstName} ${showMessage.senderLastName}`}
+          <LockOutlinedIcon fontSize="large" color="primary" />
+          <Typography variant="h5" mb={2}>
+            Signup
           </Typography>
-          <Typography variant="body2" mb={2}>
-            Date: {new Date(showMessage.date).toLocaleDateString()}
-          </Typography>
-          <Typography variant="body1" mb={2}>
-            {showMessage.messageContent}
-          </Typography>
+          {errors.general && (
+            <Typography color="error" mb={2}>
+              {errors.general}
+            </Typography>
+          )}
+          <Grid container spacing={2}>
+            <Grid item xs={6}>
+              <TextField
+                variant="outlined"
+                margin="normal"
+                required
+                fullWidth
+                id="firstname"
+                label="First Name"
+                name="firstname"
+                autoComplete="given-name"
+                autoFocus
+                value={firstname}
+                onChange={(e) => setFirstname(e.target.value)}
+                error={!!errors.firstname}
+                helperText={errors.firstname}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <TextField
+                variant="outlined"
+                margin="normal"
+                required
+                fullWidth
+                id="lastname"
+                label="Last Name"
+                name="lastname"
+                autoComplete="family-name"
+                value={lastname}
+                onChange={(e) => setLastname(e.target.value)}
+                error={!!errors.lastname}
+                helperText={errors.lastname}
+              />
+            </Grid>
+          </Grid>
+          <TextField
+            variant="outlined"
+            margin="normal"
+            required
+            fullWidth
+            id="email"
+            label="Email Address"
+            name="email"
+            autoComplete="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            error={!!errors.email}
+            helperText={errors.email}
+          />
+          <TextField
+            variant="outlined"
+            margin="normal"
+            required
+            fullWidth
+            name="password"
+            label="Password"
+            type="password"
+            id="password"
+            autoComplete="current-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            error={!!errors.password}
+            helperText={errors.password}
+          />
+          <TextField
+            variant="outlined"
+            margin="normal"
+            required
+            fullWidth
+            name="confirmPassword"
+            label="Confirm Password"
+            type="password"
+            id="confirmPassword"
+            autoComplete="current-password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            error={!!errors.password}
+            helperText={errors.password} // You might want to show the same error message
+          />
           <Button
+            type="submit"
+            fullWidth
             variant="contained"
             color="primary"
-            onClick={handleCloseMessage}
-            sx={{ mt: 2, borderRadius: "100px" }}
+            sx={{ mt: 3, mb: 2, borderRadius: "100px" }}
           >
-            Close
+            Sign Up
           </Button>
+          <Typography variant="body2">
+            Already have an account? <Link to="/login">Login</Link>
+          </Typography>
         </Box>
-      )}
+      </LocalizationProvider>
     </Box>
   );
 };
 
-export default MessagePage;
+export default RegisterPage;

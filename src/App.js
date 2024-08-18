@@ -8,6 +8,7 @@ import Login from "./scenes/login";
 import Register from "./scenes/register";
 import ProfilePage from "./scenes/profile";
 import MessagesPage from "./scenes/message";
+import AuthPage from "./scenes/auth";
 import { ColorModeContext, useMode } from "./theme";
 import axios from "axios";
 import { UserProvider, useUser } from "./scenes/global/UserProvider";
@@ -63,12 +64,13 @@ const App = () => {
         <ThemeProvider theme={theme}>
           <CssBaseline />
           <div className="app">
-            <UserNavigator /> {/* Add the UserNavigator at the top */}
+            <UserNavigator />
             {isLoggedIn && <Sidebar />}
             <main className="content">
-              <Topbar loginMode={isLoggedIn} />
+              {/* <Topbar loginMode={isLoggedIn} /> */}
+              {isLoggedIn && <Topbar />}
               <Routes>
-                <Route path="/login" element={<Login />} />
+                <Route path="/login" element={<AuthPage />} />
                 <Route path="/register" element={<Register />} />
 
                 {/* Protect the other routes to require authentication */}
