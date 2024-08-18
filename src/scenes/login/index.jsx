@@ -12,7 +12,7 @@ import {
   colors,
 } from "@mui/material";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { images } from "../../assets";
 import { Link, useNavigate } from "react-router-dom";
 import Animate from "../../components/common/Animate";
@@ -60,7 +60,7 @@ const AuthPage = () => {
       setIsLoggedIn(true);
       setTimeout(() => {
         navigate("/dashboard");
-      }, 1200);
+      }, 1000);
     } catch (error) {
       clearInterval(interval);
       setOnRequest(false);
@@ -118,7 +118,7 @@ const AuthPage = () => {
             ? "100%"
             : { xl: "30%", lg: "40%", md: "50%", xs: "100%" },
           transition: "all 1s ease-in-out",
-          bgcolor: colors.common.white,
+          bgcolor: "#FCFCFC",
         }}
       >
         <Box

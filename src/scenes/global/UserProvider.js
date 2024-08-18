@@ -3,8 +3,11 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 const UserContext = createContext();
 
 export const UserProvider = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [user, setUser] = useState(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    const token = localStorage.getItem("token");
+    return !!token;
+  });
+  const [user, setUser] = useState(localStorage.getItem("user"));
   const [unreadMessageCount, setUnreadMessageCount] = useState(0);
 
   useEffect(() => {

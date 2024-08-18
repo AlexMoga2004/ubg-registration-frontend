@@ -15,6 +15,7 @@ import { UserProvider, useUser } from "./scenes/global/UserProvider";
 // ProtectedRoute Component
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated } = useUser(); // Get the authentication state
+  if (!isAuthenticated) console.log("this is what is kicking me back!");
 
   return isAuthenticated ? children : <Navigate to="/login" />;
 };

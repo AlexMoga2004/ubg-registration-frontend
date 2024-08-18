@@ -4,6 +4,7 @@ import "react-pro-sidebar/dist/css/styles.css";
 import { Box, IconButton, Typography, useTheme } from "@mui/material";
 import { Link } from "react-router-dom";
 import { tokens } from "../../theme";
+import Animate from "../../components/common/Animate";
 
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
 import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
@@ -66,139 +67,149 @@ const Sidebar = () => {
         },
       }}
     >
-      <ProSidebar collapsed={isCollapsed}>
-        <Menu iconShape="square">
-          {/* LOGO AND MENU ICON */}
-          <MenuItem
-            onClick={() => setIsCollapsed(!isCollapsed)}
-            icon={isCollapsed ? <MenuOutlinedIcon /> : undefined}
-            style={{
-              margin: "10px 0 20px 0",
-              color: colors.grey[100],
-            }}
-          >
-            {!isCollapsed && (
-              <Box
-                display="flex"
-                justifyContent="space-between"
-                alignItems="center"
-                ml="15px"
+      <Animate sx={{ flexGrow: 1 }}>
+        <ProSidebar collapsed={isCollapsed}>
+          <Menu iconShape="square">
+            {/* LOGO AND MENU ICON */}
+            <Animate type="fade" delay={1}>
+              <MenuItem
+                onClick={() => setIsCollapsed(!isCollapsed)}
+                icon={isCollapsed ? <MenuOutlinedIcon /> : undefined}
+                style={{
+                  margin: "10px 0 20px 0",
+                  color: colors.grey[100],
+                }}
               >
-                <Typography variant="h6" color={colors.grey[100]}>
-                  University of Bahr el Ghazal
-                </Typography>
-                <IconButton onClick={() => setIsCollapsed(!isCollapsed)}>
-                  <MenuOutlinedIcon />
-                </IconButton>
-              </Box>
-            )}
-          </MenuItem>
+                {!isCollapsed && (
+                  <Box
+                    display="flex"
+                    justifyContent="center"
+                    alignItems="center"
+                    ml="15px"
+                  >
+                    <Typography variant="h6" color={colors.grey[100]}>
+                      Bahr el Ghazal
+                    </Typography>
+                    <IconButton onClick={() => setIsCollapsed(!isCollapsed)}>
+                      <MenuOutlinedIcon />
+                    </IconButton>
+                  </Box>
+                )}
+              </MenuItem>
 
-          {!isCollapsed && user && (
-            <Box mb="25px">
-              <Box display="flex" justifyContent="center" alignItems="center">
-                <img
-                  alt="profile-user"
-                  width="100px"
-                  height="100px"
-                  src={`data:image/png;base64,${profilePic}`} // Use the Base64 string directly
-                  style={{ cursor: "pointer", borderRadius: "50%" }}
+              {!isCollapsed && user && (
+                <Box mb="25px">
+                  <Box
+                    display="flex"
+                    justifyContent="center"
+                    alignItems="center"
+                  >
+                    <img
+                      alt="profile-user"
+                      width="100px"
+                      height="100px"
+                      src={`data:image/png;base64,${profilePic}`} // Use the Base64 string directly
+                      style={{ cursor: "pointer", borderRadius: "50%" }}
+                    />
+                  </Box>
+                  <Box textAlign="center">
+                    <Typography
+                      variant="h2"
+                      color={colors.grey[100]}
+                      fontWeight="bold"
+                      sx={{ m: "10px 0 0 0" }}
+                    >
+                      {user.firstname + " " + user.lastname}
+                    </Typography>
+                    <Typography variant="h5" color={colors.greenAccent[500]}>
+                      {user.roles && user.roles.join(", ")}
+                    </Typography>
+                  </Box>
+                </Box>
+              )}
+            </Animate>
+
+            <Animate sx={{ flexGrow: 1 }} delay={1}>
+              <Box paddingLeft={isCollapsed ? undefined : "10%"}>
+                <Item
+                  title="Dashboard"
+                  to="/dashboard"
+                  icon={<HomeOutlinedIcon />}
+                  selected={selected}
+                  setSelected={setSelected}
                 />
-              </Box>
-              <Box textAlign="center">
-                <Typography
-                  variant="h2"
-                  color={colors.grey[100]}
-                  fontWeight="bold"
-                  sx={{ m: "10px 0 0 0" }}
-                >
-                  {user.firstname + " " + user.lastname}
-                </Typography>
-                <Typography variant="h5" color={colors.greenAccent[500]}>
-                  {user.roles && user.roles.join(", ")}
-                </Typography>
-              </Box>
-            </Box>
-          )}
-
-          <Box paddingLeft={isCollapsed ? undefined : "10%"}>
-            <Item
-              title="Dashboard"
-              to="/dashboard"
-              icon={<HomeOutlinedIcon />}
-              selected={selected}
-              setSelected={setSelected}
-            />
-            <Typography
-              variant="h6"
-              color={colors.grey[300]}
-              sx={{ m: "15px 0 5px 20px" }}
-            >
-              Info
-            </Typography>
-            <Item
-              title="Enroll"
-              to="/enroll"
-              icon={<SchoolOutlinedIcon />}
-              selected={selected}
-              setSelected={setSelected}
-            />
-            <Item
-              title="Your Classes"
-              to="/classes"
-              icon={<LibraryBooksOutlinedIcon />}
-              selected={selected}
-              setSelected={setSelected}
-            />
-            <Item
-              title="Messages"
-              to="/messages"
-              icon={<MessageOutlinedIcon />}
-              selected={selected}
-              setSelected={setSelected}
-            />
-            <Typography
-              variant="h6"
-              color={colors.grey[300]}
-              sx={{ m: "15px 0 5px 20px" }}
-            >
-              Misc
-            </Typography>
-            <Item
-              title="FAQ"
-              to="/faq"
-              icon={<ContactSupportOutlinedIcon />}
-              selected={selected}
-              setSelected={setSelected}
-            />
-            {user && user.roles && user.roles.includes("Admin") && (
-              <>
                 <Typography
                   variant="h6"
                   color={colors.grey[300]}
                   sx={{ m: "15px 0 5px 20px" }}
                 >
-                  Admin
+                  Info
                 </Typography>
                 <Item
-                  title="Manage all Modules"
-                  to="/manage_modules"
-                  icon={<AddOutlinedIcon />}
+                  title="Enroll"
+                  to="/enroll"
+                  icon={<SchoolOutlinedIcon />}
                   selected={selected}
                   setSelected={setSelected}
                 />
                 <Item
-                  title="Signup Windows"
-                  to="/signup_windows"
-                  icon={<EditCalendarOutlinedIcon />}
+                  title="Your Classes"
+                  to="/classes"
+                  icon={<LibraryBooksOutlinedIcon />}
                   selected={selected}
                   setSelected={setSelected}
                 />
-              </>
-            )}
-          </Box>
-        </Menu>
-      </ProSidebar>
+                <Item
+                  title="Messages"
+                  to="/messages"
+                  icon={<MessageOutlinedIcon />}
+                  selected={selected}
+                  setSelected={setSelected}
+                />
+                <Typography
+                  variant="h6"
+                  color={colors.grey[300]}
+                  sx={{ m: "15px 0 5px 20px" }}
+                >
+                  Misc
+                </Typography>
+                <Item
+                  title="FAQ"
+                  to="/faq"
+                  icon={<ContactSupportOutlinedIcon />}
+                  selected={selected}
+                  setSelected={setSelected}
+                />
+                {user && user.roles && user.roles.includes("Admin") && (
+                  <>
+                    <Typography
+                      variant="h6"
+                      color={colors.grey[300]}
+                      sx={{ m: "15px 0 5px 20px" }}
+                    >
+                      Admin
+                    </Typography>
+                    <Item
+                      title="Manage all Modules"
+                      to="/manage_modules"
+                      icon={<AddOutlinedIcon />}
+                      selected={selected}
+                      setSelected={setSelected}
+                    />
+                    <Item
+                      title="Signup Windows"
+                      to="/signup_windows"
+                      icon={<EditCalendarOutlinedIcon />}
+                      selected={selected}
+                      setSelected={setSelected}
+                    />
+                  </>
+                )}
+              </Box>
+            </Animate>
+          </Menu>
+        </ProSidebar>
+      </Animate>
     </Box>
   );
 };

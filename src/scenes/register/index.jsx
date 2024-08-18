@@ -135,7 +135,7 @@ const RegisterPage = () => {
               ? "30%"
               : { xl: "40%", lg: "50%", md: "60%", xs: "100%" },
           transition: "all 1s ease-in-out",
-          bgcolor: colors.common.white,
+          bgcolor: "#FCFCFC",
         }}
       >
         <Box
