@@ -63,6 +63,7 @@ const Topbar = ({ loginMode: isLoggedIn }) => {
   const handleLogout = () => {
     setIsAuthenticated(false);
     setUser(null);
+    if (theme.palette.mode === "dark") colorMode.toggleColorMode();
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     handleNotificationClose();
@@ -96,10 +97,9 @@ const Topbar = ({ loginMode: isLoggedIn }) => {
 
   useEffect(() => {
     if (user) {
-      // Check if user exists before fetching
       fetchUnreadMessageCount();
     }
-  }, [user]); // Fetch unread message count when user changes
+  }, [user]);
 
   return (
     <Box display="flex" justifyContent="space-between" p={2}>
@@ -164,12 +164,12 @@ const Topbar = ({ loginMode: isLoggedIn }) => {
               <Typography
                 sx={{
                   p: 2,
-                  cursor: "pointer", // Make cursor a pointer to indicate it's clickable
-                  bgcolor: colors.primary[300], // Light background color to stand out
+                  cursor: "pointer",
+                  bgcolor: colors.primary[300],
                   borderRadius: 1,
                   "&:hover": {
-                    bgcolor: colors.primary[400], // Darker background on hover
-                    color: colors.grey[100], // Change text color on hover
+                    bgcolor: colors.primary[400],
+                    color: colors.grey[100],
                   },
                 }}
                 onClick={handleNotificationRedirect}

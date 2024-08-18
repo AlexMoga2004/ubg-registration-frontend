@@ -4,11 +4,10 @@ import { useLocation, Routes, Route, Navigate } from "react-router-dom";
 import Topbar from "./scenes/global/Topbar";
 import Sidebar from "./scenes/global/Sidebar";
 import Dashboard from "./scenes/dashboard";
-import Login from "./scenes/login";
 import Register from "./scenes/register";
 import ProfilePage from "./scenes/profile";
 import MessagesPage from "./scenes/message";
-import AuthPage from "./scenes/auth";
+import LoginPage from "./scenes/login";
 import { ColorModeContext, useMode } from "./theme";
 import axios from "axios";
 import { UserProvider, useUser } from "./scenes/global/UserProvider";
@@ -68,9 +67,9 @@ const App = () => {
             {isLoggedIn && <Sidebar />}
             <main className="content">
               {/* <Topbar loginMode={isLoggedIn} /> */}
-              {isLoggedIn && <Topbar />}
+              {isLoggedIn && <Topbar loginMode={isLoggedIn} />}
               <Routes>
-                <Route path="/login" element={<AuthPage />} />
+                <Route path="/login" element={<LoginPage />} />
                 <Route path="/register" element={<Register />} />
 
                 {/* Protect the other routes to require authentication */}

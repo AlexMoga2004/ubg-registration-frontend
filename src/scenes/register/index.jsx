@@ -1,208 +1,325 @@
 import {
   Box,
   Button,
+  CircularProgress,
+  Grid,
+  Stack,
   TextField,
   Typography,
-  Grid,
-  useTheme,
+  circularProgressClasses,
+  colors,
 } from "@mui/material";
-import { useContext, useState } from "react";
-import { ColorModeContext, tokens } from "../../theme";
-import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
-import logo from "../../data/images/logo.png";
-import axios from "axios";
+import React, { useState } from "react";
+import { images } from "../../assets";
 import { Link, useNavigate } from "react-router-dom";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
-import { DesktopDatePicker } from "@mui/x-date-pickers/DesktopDatePicker";
+import Animate from "../../components/common/Animate";
+import HowToRegOutlinedIcon from "@mui/icons-material/HowToRegOutlined";
+import axios from "axios";
 
 const RegisterPage = () => {
-  const theme = useTheme();
-  const colors = tokens(theme.palette.mode);
   const navigate = useNavigate();
 
-  const [firstname, setFirstname] = useState("");
-  const [lastname, setLastname] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const [onRequest, setOnRequest] = useState(false);
+  const [registerProgress, setRegisterProgress] = useState(0);
+  const [isRegistered, setIsRegistered] = useState(false);
+  const [animateSidebar, setAnimateSidebar] = useState(false);
 
-  // State for error messages
-  const [errors, setErrors] = useState({});
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    password: "",
+  });
 
-  const handleSignup = async (event) => {
-    event.preventDefault();
-    if (password !== confirmPassword) {
-      setErrors({ ...errors, password: "Passwords do not match" });
-      return;
-    }
+  const [formErrors, setFormErrors] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    password: "",
+    general: "",
+  });
+
+  const onRegister = async (e) => {
+    e.preventDefault();
+    setOnRequest(true);
+
+    // Start the progress animation
+    const interval = setInterval(() => {
+      setRegisterProgress((prev) => prev + 100 / 40);
+    }, 50);
 
     try {
       const response = await axios.post("http://localhost:8080/auth/register", {
-        firstname: firstname,
-        lastname: lastname,
-        email: email,
-        password: password,
+        firstname: formData.firstName,
+        lastname: formData.lastName,
+        email: formData.email,
+        password: formData.password,
       });
 
-      navigate("/login", {
-        state: { message: "User registered successfully" },
-      });
+      clearInterval(interval);
+      setRegisterProgress(100);
+      const { token, user } = response.data;
+      localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(user));
+
+      setIsRegistered(true);
+      setTimeout(() => {
+        navigate("/login");
+      }, 1200);
     } catch (error) {
-      if (error.response) {
-        // Clear previous errors
-        setErrors({});
-        // Set errors based on the response
-        setErrors(error.response.data);
+      clearInterval(interval);
+      setOnRequest(false);
+      setRegisterProgress(0);
+
+      if (error.response && error.response.data) {
+        const { firstname, lastname, email, password } = error.response.data;
+        setFormErrors({
+          firstName: firstname || "",
+          lastName: lastname || "",
+          email: email || "",
+          password: password || "",
+          general: "",
+        });
       } else {
-        setErrors({
-          general: "An unexpected error occurred. Please try again.",
+        setFormErrors({
+          ...formErrors,
+          general: "Network error.",
         });
       }
     }
   };
 
+  const handleLoginClick = () => {
+    setAnimateSidebar(true);
+    setTimeout(() => {
+      navigate("/login");
+    }, 1000);
+  };
+
+  const handleChange = (field) => (e) => {
+    setFormData({
+      ...formData,
+      [field]: e.target.value,
+    });
+  };
+
   return (
     <Box
-      display="flex"
-      flexDirection="column"
-      alignItems="center"
-      justifyContent="center"
-      minHeight="75vh"
-      p={2}
+      position="relative"
+      height="100vh"
+      sx={{ "::-webkit-scrollbar": { display: "none" } }}
     >
+      {/* background box */}
       <Box
-        position="absolute"
-        top="20px"
-        display="flex"
-        flexDirection="column"
-        alignItems="center"
-        justifyContent="center"
-        mb={4}
+        sx={{
+          position: "absolute",
+          right: 0,
+          height: "100%",
+          width: "70%",
+          backgroundPosition: "center",
+          backgroundSize: "cover",
+          backgroundRepeat: "no-repeat",
+          backgroundImage: `url(${images.loginBg})`,
+        }}
+      />
+      {/* background box */}
+
+      {/* Register form */}
+      <Box
+        sx={{
+          position: "absolute",
+          left: 0,
+          height: "100%",
+          width:
+            animateSidebar || isRegistered
+              ? "30%"
+              : { xl: "40%", lg: "50%", md: "60%", xs: "100%" },
+          transition: "all 1s ease-in-out",
+          bgcolor: colors.common.white,
+        }}
       >
-        <img
-          src={logo}
-          alt="Logo"
-          style={{ width: "150px", marginBottom: "20px" }}
-        />
-      </Box>
-      <LocalizationProvider dateAdapter={AdapterDateFns}>
         <Box
-          component="form"
-          onSubmit={handleSignup}
-          display="flex"
-          flexDirection="column"
-          alignItems="center"
-          justifyContent="center"
-          backgroundColor={colors.primary[400]}
-          p={4}
-          borderRadius="16px"
-          boxShadow={3}
-          width="100%"
-          maxWidth="400px"
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "space-between",
+            opacity: animateSidebar ? 0 : 1,
+            transition: "all 0.3s ease-in-out",
+            height: "100%",
+            "::-webkit-scrollbar": { display: "none" },
+          }}
         >
-          <LockOutlinedIcon fontSize="large" color="primary" />
-          <Typography variant="h5" mb={2}>
-            Signup
-          </Typography>
-          {errors.general && (
-            <Typography color="error" mb={2}>
-              {errors.general}
-            </Typography>
-          )}
-          <Grid container spacing={2}>
-            <Grid item xs={6}>
-              <TextField
-                variant="outlined"
-                margin="normal"
-                required
-                fullWidth
-                id="firstname"
-                label="First Name"
-                name="firstname"
-                autoComplete="given-name"
-                autoFocus
-                value={firstname}
-                onChange={(e) => setFirstname(e.target.value)}
-                error={!!errors.firstname}
-                helperText={errors.firstname}
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <TextField
-                variant="outlined"
-                margin="normal"
-                required
-                fullWidth
-                id="lastname"
-                label="Last Name"
-                name="lastname"
-                autoComplete="family-name"
-                value={lastname}
-                onChange={(e) => setLastname(e.target.value)}
-                error={!!errors.lastname}
-                helperText={errors.lastname}
-              />
-            </Grid>
-          </Grid>
-          <TextField
-            variant="outlined"
-            margin="normal"
-            required
-            fullWidth
-            id="email"
-            label="Email Address"
-            name="email"
-            autoComplete="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            error={!!errors.email}
-            helperText={errors.email}
-          />
-          <TextField
-            variant="outlined"
-            margin="normal"
-            required
-            fullWidth
-            name="password"
-            label="Password"
-            type="password"
-            id="password"
-            autoComplete="current-password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            error={!!errors.password}
-            helperText={errors.password}
-          />
-          <TextField
-            variant="outlined"
-            margin="normal"
-            required
-            fullWidth
-            name="confirmPassword"
-            label="Confirm Password"
-            type="password"
-            id="confirmPassword"
-            autoComplete="current-password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            error={!!errors.password}
-            helperText={errors.password} // You might want to show the same error message
-          />
-          <Button
-            type="submit"
-            fullWidth
-            variant="contained"
-            color="primary"
-            sx={{ mt: 3, mb: 2, borderRadius: "100px" }}
+          {/* logo */}
+          <Box sx={{ textAlign: "center", p: 5 }}>
+            <Animate type="fade" delay={0.5}>
+              <img src={images.logo} alt="logo" height={150} />
+            </Animate>
+          </Box>
+          {/* logo */}
+
+          {/* form */}
+          <Box
+            sx={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              width: "100%",
+              height: "100%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              "::-webkit-scrollbar": { display: "none" },
+            }}
           >
-            Sign Up
-          </Button>
-          <Typography variant="body2">
-            Already have an account? <Link to="/login">Login</Link>
-          </Typography>
+            <Animate type="fade" sx={{ maxWidth: 500, width: "100%" }}>
+              <Box
+                component="form"
+                maxWidth={500}
+                width="100%"
+                onSubmit={onRegister}
+              >
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    mb: 2,
+                  }}
+                >
+                  <HowToRegOutlinedIcon
+                    fontSize="inherit"
+                    sx={{ fontSize: 40 }}
+                  />{" "}
+                </Box>
+                <Grid container spacing={3}>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      label="First Name"
+                      fullWidth
+                      value={formData.firstName}
+                      onChange={handleChange("firstName")}
+                      error={!!formErrors.firstName}
+                      helperText={formErrors.firstName}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      label="Last Name"
+                      fullWidth
+                      value={formData.lastName}
+                      onChange={handleChange("lastName")}
+                      error={!!formErrors.lastName}
+                      helperText={formErrors.lastName}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      label="Email"
+                      fullWidth
+                      value={formData.email}
+                      onChange={handleChange("email")}
+                      error={!!formErrors.email}
+                      helperText={formErrors.email}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      label="Password"
+                      type="password"
+                      fullWidth
+                      value={formData.password}
+                      onChange={handleChange("password")}
+                      error={!!formErrors.password}
+                      helperText={formErrors.password}
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Button
+                      type="submit"
+                      size="large"
+                      variant="contained"
+                      color="success"
+                      fullWidth
+                    >
+                      Register
+                    </Button>
+                  </Grid>
+                </Grid>
+                {formErrors.general && (
+                  <Typography
+                    variant="body2"
+                    color="error"
+                    textAlign="center"
+                    mt={2}
+                  >
+                    {formErrors.general}
+                  </Typography>
+                )}
+              </Box>
+            </Animate>
+          </Box>
+          {/* form */}
+
+          {/* footer */}
+          <Box sx={{ textAlign: "center", p: 5, zIndex: 2 }}>
+            <Animate type="fade" delay={1}>
+              <Typography
+                display="inline"
+                fontWeight="bold"
+                sx={{ "& > a": { color: colors.red[900], ml: "5px" } }}
+              >
+                Already have an account? -{" "}
+                <Link to="#" onClick={handleLoginClick}>
+                  Sign in
+                </Link>
+              </Typography>
+            </Animate>
+          </Box>
+          {/* footer */}
+
+          {/* loading box */}
+          {onRequest && (
+            <Stack
+              alignItems="center"
+              justifyContent="center"
+              sx={{
+                height: "100%",
+                width: "100%",
+                position: "absolute",
+                top: 0,
+                left: 0,
+                bgcolor: colors.common.white,
+                zIndex: 1000,
+              }}
+            >
+              <Box position="relative">
+                <CircularProgress
+                  variant="determinate"
+                  sx={{ color: colors.grey[200] }}
+                  size={100}
+                  value={100}
+                />
+                <CircularProgress
+                  variant="determinate"
+                  disableShrink
+                  value={registerProgress}
+                  size={100}
+                  sx={{
+                    [`& .${circularProgressClasses.circle}`]: {
+                      strokeLinecap: "round",
+                    },
+                    position: "absolute",
+                    left: 0,
+                    color: colors.green[600],
+                  }}
+                />
+              </Box>
+            </Stack>
+          )}
+          {/* loading box */}
         </Box>
-      </LocalizationProvider>
+      </Box>
+      {/* Register form */}
     </Box>
   );
 };

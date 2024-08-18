@@ -1,45 +1,71 @@
-import { Box, Button, TextField, Typography, useTheme } from "@mui/material";
-import { useState, useEffect } from "react";
-import { tokens } from "../../theme";
-import { Link, useNavigate } from "react-router-dom";
+import {
+  Box,
+  Button,
+  Checkbox,
+  CircularProgress,
+  FormControlLabel,
+  FormGroup,
+  Stack,
+  TextField,
+  Typography,
+  circularProgressClasses,
+  colors,
+} from "@mui/material";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
-import PersonOutlineOutlinedIcon from "@mui/icons-material/PersonOutlineOutlined";
-import logo from "../../data/images/logo.png";
+import React, { useState } from "react";
+import { images } from "../../assets";
+import { Link, useNavigate } from "react-router-dom";
+import Animate from "../../components/common/Animate";
 import axios from "axios";
-import { useUser } from "./../global/UserProvider";
+import { useUser } from "../global/UserProvider";
+import { selectedGridRowsCountSelector } from "@mui/x-data-grid";
 
-const LoginPage = () => {
-  const theme = useTheme();
-  const colors = tokens(theme.palette.mode);
+const AuthPage = () => {
   const navigate = useNavigate();
-  const { isAuthenticated, setIsAuthenticated, setUser } = useUser(); // Access authentication state
+
+  const [onRequest, setOnRequest] = useState(false);
+  const [loginProgress, setLoginProgress] = useState(0);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [animateSidebar, setAnimateSidebar] = useState(false);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    if (isAuthenticated) {
-      navigate("/dashboard");
-    }
-  }, [isAuthenticated, navigate]);
+  const { isAuthenticated, setIsAuthenticated, setUser } = useUser();
 
-  const handleLogin = async (event) => {
-    event.preventDefault();
+  const onSignin = async (e) => {
+    e.preventDefault();
+    setOnRequest(true);
+
+    const interval = setInterval(() => {
+      setLoginProgress((prev) => prev + 100 / 40);
+    }, 50);
+
     try {
       const response = await axios.post("http://localhost:8080/auth/login", {
         email: email,
         password: password,
       });
 
+      clearInterval(interval);
+      setLoginProgress(100);
       const { token, user } = response.data;
       localStorage.setItem("token", token);
       localStorage.setItem("user", JSON.stringify(user));
 
-      setIsAuthenticated(true);
       setUser(user);
-      navigate("/dashboard");
+      setIsAuthenticated(true);
+
+      setIsLoggedIn(true);
+      setTimeout(() => {
+        navigate("/dashboard");
+      }, 1200);
     } catch (error) {
+      clearInterval(interval);
+      setOnRequest(false);
+      setLoginProgress(0);
+
       if (error.response) {
         if (error.response.status === 401) {
           setError("Invalid email or password");
@@ -52,101 +78,216 @@ const LoginPage = () => {
     }
   };
 
+  const handleRegisterClick = () => {
+    setAnimateSidebar(true);
+    setTimeout(() => {
+      navigate("/register");
+    }, 1000);
+  };
+
   return (
     <Box
-      display="flex"
-      flexDirection="column"
-      alignItems="center"
-      justifyContent="center"
-      minHeight="75vh"
-      p={2}
+      position="relative"
+      height="100vh"
+      sx={{ "::-webkit-scrollbar": { display: "none" } }}
     >
+      {/* background box */}
       <Box
-        position="absolute"
-        top="20px"
-        display="flex"
-        flexDirection="column"
-        alignItems="center"
-        justifyContent="center"
-        mb={4}
-      >
-        <img
-          src={logo}
-          alt="Logo"
-          style={{ width: "150px", marginBottom: "20px" }}
-        />
-      </Box>
+        sx={{
+          position: "absolute",
+          right: 0,
+          height: "100%",
+          width: "70%",
+          backgroundPosition: "center",
+          backgroundSize: "cover",
+          backgroundRepeat: "no-repeat",
+          backgroundImage: `url(${images.loginBg})`,
+        }}
+      />
+      {/* background box */}
+
+      {/* Login form */}
       <Box
-        component="form"
-        onSubmit={handleLogin}
-        display="flex"
-        flexDirection="column"
-        alignItems="center"
-        justifyContent="center"
-        backgroundColor={colors.primary[400]}
-        p={4}
-        borderRadius="16px"
-        boxShadow={3}
+        sx={{
+          position: "absolute",
+          left: 0,
+          height: "100%",
+          width: animateSidebar
+            ? "40%"
+            : isLoggedIn
+            ? "100%"
+            : { xl: "30%", lg: "40%", md: "50%", xs: "100%" },
+          transition: "all 1s ease-in-out",
+          bgcolor: colors.common.white,
+        }}
       >
-        <LockOutlinedIcon fontSize="large" color="inherit" />{" "}
-        {/* Change here */}
-        <Typography variant="h5" mb={2}>
-          Login
-        </Typography>
-        {error && (
-          <Typography variant="body2" color="error" mb={2}>
-            {error}
-          </Typography>
-        )}
-        <TextField
-          variant="outlined"
-          margin="normal"
-          required
-          fullWidth
-          id="email"
-          label="Email Address"
-          name="email"
-          autoComplete="email"
-          autoFocus
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          InputProps={{
-            startAdornment: <PersonOutlineOutlinedIcon position="start" />,
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "space-between",
+            opacity: animateSidebar ? 0 : 1,
+            transition: "all 0.3s ease-in-out",
+            height: "100%",
+            "::-webkit-scrollbar": { display: "none" },
           }}
-        />
-        <TextField
-          variant="outlined"
-          margin="normal"
-          required
-          fullWidth
-          name="password"
-          label="Password"
-          type="password"
-          id="password"
-          autoComplete="current-password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          InputProps={{
-            startAdornment: (
-              <LockOutlinedIcon position="start" color="inherit" />
-            ), // Change here
-          }}
-        />
-        <Button
-          type="submit"
-          fullWidth
-          variant="contained"
-          color="secondary"
-          sx={{ mt: 3, mb: 2, borderRadius: "100px" }}
         >
-          Sign In
-        </Button>
-        <Typography variant="body2">
-          Don't have an account? <Link to="/register">Register</Link>
-        </Typography>
+          {/* logo */}
+          <Box sx={{ textAlign: "center", p: 5 }}>
+            <Animate type="fade" delay={0.5}>
+              <img src={images.logo} alt="logo" height={150}></img>
+            </Animate>
+          </Box>
+          {/* logo */}
+
+          {/* form */}
+          <Box
+            sx={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              width: "100%",
+              height: "100%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              "::-webkit-scrollbar": { display: "none" },
+            }}
+          >
+            <Animate type="fade" sx={{ maxWidth: 400, width: "100%" }}>
+              <Box
+                component="form"
+                maxWidth={400}
+                width="100%"
+                onSubmit={onSignin}
+              >
+                <Stack spacing={3}>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      mb: 2,
+                    }}
+                  >
+                    <LockOutlinedIcon
+                      fontSize="inherit"
+                      sx={{ fontSize: 40 }}
+                    />{" "}
+                  </Box>
+                  {error && (
+                    <Typography
+                      variant="body2"
+                      color="error"
+                      mb={2}
+                      textAlign="center"
+                      fontSize={15}
+                    >
+                      {error}
+                    </Typography>
+                  )}
+                  <TextField
+                    label="Email Address"
+                    fullWidth
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                  <TextField
+                    label="Password"
+                    type="password"
+                    fullWidth
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                  <Button
+                    type="submit"
+                    size="large"
+                    variant="contained"
+                    color="success"
+                  >
+                    Sign in
+                  </Button>
+                  <Stack
+                    direction="row"
+                    justifyContent="space-between"
+                    alignItems="center"
+                  >
+                    <FormGroup>
+                      <FormControlLabel
+                        control={<Checkbox />}
+                        label="Remember me"
+                      />
+                    </FormGroup>
+                    <Typography color="error" fontWeight="bold">
+                      <Link to="#">Forgot password?</Link>
+                    </Typography>
+                  </Stack>
+                </Stack>
+              </Box>
+            </Animate>
+          </Box>
+          {/* form */}
+
+          {/* footer */}
+          <Box sx={{ textAlign: "center", p: 5, zIndex: 2 }}>
+            <Animate type="fade" delay={1}>
+              <Typography
+                display="inline"
+                fontWeight="bold"
+                sx={{ "& > a": { color: colors.red[900], ml: "5px" } }}
+              >
+                Don't have an account -
+                <Link to="#" onClick={handleRegisterClick}>
+                  Register now
+                </Link>
+              </Typography>
+            </Animate>
+          </Box>
+          {/* footer */}
+
+          {/* loading box */}
+          {onRequest && (
+            <Stack
+              alignItems="center"
+              justifyContent="center"
+              sx={{
+                height: "100%",
+                width: "100%",
+                position: "absolute",
+                top: 0,
+                left: 0,
+                bgcolor: colors.common.white,
+                zIndex: 1000,
+              }}
+            >
+              <Box position="relative">
+                <CircularProgress
+                  variant="determinate"
+                  sx={{ color: colors.grey[200] }}
+                  size={100}
+                  value={100}
+                />
+                <CircularProgress
+                  variant="determinate"
+                  disableShrink
+                  value={loginProgress}
+                  size={100}
+                  sx={{
+                    [`& .${circularProgressClasses.circle}`]: {
+                      strokeLinecap: "round",
+                    },
+                    position: "absolute",
+                    left: 0,
+                    color: colors.green[600],
+                  }}
+                />
+              </Box>
+            </Stack>
+          )}
+          {/* loading box */}
+        </Box>
       </Box>
+      {/* Login form */}
     </Box>
   );
 };
 
-export default LoginPage;
+export default AuthPage;
