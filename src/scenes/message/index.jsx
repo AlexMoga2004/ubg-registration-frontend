@@ -45,27 +45,27 @@ const MessagesPage = () => {
   const [roles, setRoles] = useState([]);
 
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated && user?.roles) {
       fetchMessages();
       if (user.roles.includes("Admin")) {
         fetchUsers();
       }
-    } else {
+    } else if (!isAuthenticated) {
       navigate("/login");
     }
-  }, [isAuthenticated, page, rowsPerPage, navigate]);
+  }, [isAuthenticated, page, rowsPerPage, navigate, user]);
 
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated && user?.roles) {
       fetchMessages();
       if (user.roles.includes("Admin")) {
         fetchUsers();
         fetchRoles(); // Fetch roles when the user is an Admin
       }
-    } else {
+    } else if (!isAuthenticated) {
       navigate("/login");
     }
-  }, [isAuthenticated, page, rowsPerPage, navigate]);
+  }, [isAuthenticated, page, rowsPerPage, navigate, user]);
 
   const fetchMessages = async () => {
     try {
@@ -225,7 +225,7 @@ const MessagesPage = () => {
         <Typography variant="h4" gutterBottom>
           Messages
         </Typography>
-        {user.roles.includes("Admin") && (
+        {user?.roles?.includes("Admin") && (
           <Button
             variant="contained"
             color="secondary"

@@ -14,7 +14,7 @@ import {
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import React, { useEffect, useState } from "react";
 import { images } from "../../assets";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import Animate from "../../components/common/Animate";
 import axios from "axios";
 import { useUser } from "../global/UserProvider";
@@ -27,6 +27,12 @@ const AuthPage = () => {
   const [loginProgress, setLoginProgress] = useState(0);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [animateSidebar, setAnimateSidebar] = useState(false);
+
+  const location = useLocation();
+  console.log(localStorage.getItem("skipAnimation"));
+  const [openingAnimation, setOpeningAnimation] = useState(
+    localStorage.getItem("skipAnimation") !== "true"
+  );
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -85,6 +91,15 @@ const AuthPage = () => {
     }, 1000);
   };
 
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setOpeningAnimation(false);
+      localStorage.setItem("skipAnimation", "false");
+    }, 1500);
+
+    return () => clearTimeout(timer);
+  });
+
   return (
     <Box
       position="relative"
@@ -114,7 +129,7 @@ const AuthPage = () => {
           height: "100%",
           width: animateSidebar
             ? "40%"
-            : isLoggedIn
+            : isLoggedIn || openingAnimation
             ? "100%"
             : { xl: "30%", lg: "40%", md: "50%", xs: "100%" },
           transition: "all 1s ease-in-out",

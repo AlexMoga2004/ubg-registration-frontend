@@ -1,6 +1,12 @@
 import React, { useEffect } from "react";
 import { Box, CssBaseline, ThemeProvider } from "@mui/material";
-import { useLocation, Routes, Route, Navigate } from "react-router-dom";
+import {
+  useLocation,
+  Routes,
+  Route,
+  Navigate,
+  useNavigate,
+} from "react-router-dom";
 import Topbar from "./scenes/global/Topbar";
 import Sidebar from "./scenes/global/Sidebar";
 import Dashboard from "./scenes/dashboard";
@@ -67,7 +73,6 @@ const App = () => {
             <UserNavigator />
             {isLoggedIn && <Sidebar />}
             <main className="content">
-              {/* <Topbar loginMode={isLoggedIn} /> */}
               {isLoggedIn && <Topbar loginMode={isLoggedIn} />}
               <Routes>
                 <Route path="/login" element={<LoginPage />} />

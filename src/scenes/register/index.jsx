@@ -92,6 +92,7 @@ const RegisterPage = () => {
   const handleLoginClick = () => {
     setAnimateSidebar(true);
     setTimeout(() => {
+      localStorage.setItem("skipAnimation", "true");
       navigate("/login");
     }, 1000);
   };

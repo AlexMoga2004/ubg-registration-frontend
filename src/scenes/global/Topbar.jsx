@@ -6,6 +6,11 @@ import {
   MenuItem,
   Popover,
   Typography,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
 } from "@mui/material";
 import React, { useContext, useState, useEffect } from "react";
 import { ColorModeContext, tokens } from "../../theme";
@@ -13,20 +18,19 @@ import { InputBase } from "@mui/material";
 import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
 import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
 import NotificationsOutlinedIcon from "@mui/icons-material/NotificationsOutlined";
-import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import SearchIcon from "@mui/icons-material/Search";
-import { useUser } from "./../global/UserProvider";
-import { Link, useNavigate } from "react-router-dom";
+import { useUser } from "../global/UserProvider";
+import { useNavigate } from "react-router-dom";
 import Animate from "../../components/common/Animate";
 import axios from "axios";
+import ProfileModal from "../profile"; // Import the new ProfileModal component
 
 const Topbar = ({ loginMode: isLoggedIn }) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const colorMode = useContext(ColorModeContext);
 
-  // Access user and unreadMessageCount from UserContext
   const {
     setIsAuthenticated,
     setUser,
@@ -68,14 +72,14 @@ const Topbar = ({ loginMode: isLoggedIn }) => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     handleNotificationClose();
-    handleMenuClose(); // Ensure the user menu also closes
+    handleMenuClose();
     navigate("/login");
   };
 
   const handleNotificationRedirect = () => {
-    handleNotificationClose(); // Close the notification popover
+    handleNotificationClose();
     if (unreadMessageCount > 0) {
-      navigate("/messages"); // Redirect to messages tab
+      navigate("/messages");
     }
   };
 
@@ -101,6 +105,12 @@ const Topbar = ({ loginMode: isLoggedIn }) => {
       fetchUnreadMessageCount();
     }
   }, [user]);
+
+  // Modal state
+  const [openProfileModal, setOpenProfileModal] = useState(false);
+
+  const handleOpenProfileModal = () => setOpenProfileModal(true);
+  const handleCloseProfileModal = () => setOpenProfileModal(false);
 
   return (
     <Box display="flex" justifyContent="space-between" p={2}>
@@ -143,8 +153,8 @@ const Topbar = ({ loginMode: isLoggedIn }) => {
                       backgroundColor: "red",
                       borderRadius: "50%",
                       color: "white",
-                      padding: "2px 4px", // Smaller padding
-                      fontSize: "10px", // Smaller font size
+                      padding: "2px 4px",
+                      fontSize: "10px",
                     }}
                   >
                     {unreadMessageCount}
@@ -184,9 +194,7 @@ const Topbar = ({ loginMode: isLoggedIn }) => {
                 </Typography>
               </Popover>
 
-              {/* <IconButton>
-              <SettingsOutlinedIcon />
-            </IconButton> */}
+              {/* User menu */}
               <IconButton onClick={handleMenuOpen}>
                 <PersonOutlinedIcon />
               </IconButton>
@@ -195,19 +203,24 @@ const Topbar = ({ loginMode: isLoggedIn }) => {
                 open={Boolean(anchorEl)}
                 onClose={handleMenuClose}
               >
-                <MenuItem
-                  component={Link}
-                  to="/profile"
-                  onClick={handleMenuClose}
-                >
-                  Profile
-                </MenuItem>
+                <MenuItem onClick={handleOpenProfileModal}>Profile</MenuItem>
                 <MenuItem onClick={handleLogout}>Sign out</MenuItem>
               </Menu>
             </Box>
           )}
         </Box>
       </Animate>
+
+      {/* Profile Modal */}
+      <Dialog open={openProfileModal} onClose={handleCloseProfileModal}>
+        <DialogTitle>Profile</DialogTitle>
+        <DialogContent>
+          <ProfileModal closeModal={handleCloseProfileModal} />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseProfileModal}>Close</Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };
