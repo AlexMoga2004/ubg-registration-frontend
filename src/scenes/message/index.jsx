@@ -19,7 +19,7 @@ import {
 import { tokens } from "../../theme";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { useUser } from "./../global/UserProvider"; // Use the UserProvider context
+import { useUser } from "./../global/UserProvider";
 import Animate from "../../components/common/Animate";
 
 const MessagesPage = () => {

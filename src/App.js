@@ -12,16 +12,17 @@ import Sidebar from "./scenes/global/Sidebar";
 import Dashboard from "./scenes/dashboard";
 import Register from "./scenes/register";
 import ProfilePage from "./scenes/profile";
+import Enrolpage from "./scenes/enrol";
 import MessagesPage from "./scenes/message";
 import LoginPage from "./scenes/login";
 import { ColorModeContext, useMode } from "./theme";
 import axios from "axios";
 import { UserProvider, useUser } from "./scenes/global/UserProvider";
+import WindowPage from "./scenes/window";
+import EnrolPage from "./scenes/enrol";
 
-// ProtectedRoute Component
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated } = useUser(); // Get the authentication state
-  if (!isAuthenticated) console.log("this is what is kicking me back!");
 
   return isAuthenticated ? children : <Navigate to="/login" />;
 };
@@ -77,13 +78,20 @@ const App = () => {
               <Routes>
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/register" element={<Register />} />
-
                 {/* Protect the other routes to require authentication */}
                 <Route
                   path="/dashboard"
                   element={
                     <ProtectedRoute>
                       <Dashboard />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/enrol"
+                  element={
+                    <ProtectedRoute>
+                      <EnrolPage />
                     </ProtectedRoute>
                   }
                 />
@@ -103,7 +111,14 @@ const App = () => {
                     </ProtectedRoute>
                   }
                 />
-
+                <Route
+                  path="/windows"
+                  element={
+                    <ProtectedRoute>
+                      <WindowPage />
+                    </ProtectedRoute>
+                  }
+                />
                 {/* Set default page */}
                 <Route
                   path="*"

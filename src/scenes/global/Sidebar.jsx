@@ -153,8 +153,8 @@ const Sidebar = () => {
                 Info
               </Typography>
               <Item
-                title="Enroll"
-                to="/enroll"
+                title="Enrol"
+                to="/enrol"
                 icon={<SchoolOutlinedIcon />}
                 selected={selected}
                 setSelected={setSelected}
@@ -205,7 +205,7 @@ const Sidebar = () => {
                   />
                   <Item
                     title="Signup Windows"
-                    to="/signup_windows"
+                    to="/windows"
                     icon={<EditCalendarOutlinedIcon />}
                     selected={selected}
                     setSelected={setSelected}

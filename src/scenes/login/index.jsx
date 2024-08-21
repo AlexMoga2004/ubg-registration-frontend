@@ -92,6 +92,12 @@ const AuthPage = () => {
   };
 
   useEffect(() => {
+    if (isAuthenticated && !isLoggedIn) {
+      navigate("/dashboard");
+    }
+  }, [isAuthenticated, navigate]);
+
+  useEffect(() => {
     const timer = setTimeout(() => {
       setOpeningAnimation(false);
       localStorage.setItem("skipAnimation", "false");
