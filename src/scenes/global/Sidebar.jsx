@@ -198,7 +198,7 @@ const Sidebar = () => {
                   </Typography>
                   <Item
                     title="Manage all Modules"
-                    to="/manage_modules"
+                    to="/modules"
                     icon={<AddOutlinedIcon />}
                     selected={selected}
                     setSelected={setSelected}

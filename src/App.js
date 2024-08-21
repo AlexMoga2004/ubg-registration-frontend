@@ -18,8 +18,9 @@ import LoginPage from "./scenes/login";
 import { ColorModeContext, useMode } from "./theme";
 import axios from "axios";
 import { UserProvider, useUser } from "./scenes/global/UserProvider";
-import WindowPage from "./scenes/window";
+import WindowsPage from "./scenes/window";
 import EnrolPage from "./scenes/enrol";
+import ModulesPage from "./scenes/modules";
 
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated } = useUser(); // Get the authentication state
@@ -112,10 +113,18 @@ const App = () => {
                   }
                 />
                 <Route
+                  path="/modules"
+                  element={
+                    <ProtectedRoute>
+                      <ModulesPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
                   path="/windows"
                   element={
                     <ProtectedRoute>
-                      <WindowPage />
+                      <WindowsPage />
                     </ProtectedRoute>
                   }
                 />
