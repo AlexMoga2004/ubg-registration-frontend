@@ -197,7 +197,7 @@ const Sidebar = () => {
                     Admin
                   </Typography>
                   <Item
-                    title="Manage all Modules"
+                    title="Manage Modules"
                     to="/modules"
                     icon={<AddOutlinedIcon />}
                     selected={selected}

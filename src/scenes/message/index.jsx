@@ -479,7 +479,8 @@ const MessagesPage = () => {
                   onClick={() => viewMessageDetails(message)}
                   sx={{
                     cursor: "pointer",
-                    "&:hover": { backgroundColor: colors.primary[300] }, // Change the background on hover
+                    backgroundColor: colors.primary[300],
+                    "&:hover": { backgroundColor: colors.primary[400] },
                   }}
                 >
                   <TableCell>
