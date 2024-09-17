@@ -160,7 +160,7 @@ const Sidebar = () => {
                 setSelected={setSelected}
               />
               <Item
-                title="Your Classes"
+                title="Your Applications"
                 to="/classes"
                 icon={<LibraryBooksOutlinedIcon />}
                 selected={selected}
